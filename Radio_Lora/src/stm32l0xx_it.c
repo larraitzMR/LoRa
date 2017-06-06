@@ -208,7 +208,6 @@ void SPI2_IRQHandler(void)
   HAL_SPI_IRQHandler(&hspi2);
 }
 
-
 void USART2_IRQHandler( void )
 {
    vcom_Print( );

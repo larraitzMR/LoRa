@@ -1,8 +1,5 @@
-gps.c:13:6:gps_Config	32	static
-gps.c:38:6:gps_Init	8	static
-gps.c:66:6:HAL_UART_TxCpltCallback	16	static
-gps.c:80:6:HAL_UART_RxCpltCallback	16	static
 gps.c:91:6:SPI_Config	32	static
 gps.c:116:6:SPI_Init	8	static
 gps.c:144:6:HAL_SPI_RxCpltCallback	16	static
-gps.c:164:10:Buffercmp	24	static
+gps.c:162:6:HAL_SPI_TxCpltCallback	16	static
+gps.c:174:10:Buffercmp	24	static
