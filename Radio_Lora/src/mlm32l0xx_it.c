@@ -1,17 +1,17 @@
-///*
-// / _____)             _              | |
-//( (____  _____ ____ _| |_ _____  ____| |__
-// \____ \| ___ |    (_   _) ___ |/ ___)  _ \
-// _____) ) ____| | | || |_| ____( (___| | | |
-//(______/|_____)_|_|_| \__)_____)\____)_| |_|
-//    (C)2013 Semtech
-//
-//Description: Bleeper board GPIO driver implementation
-//
-//License: Revised BSD License, see LICENSE.TXT file include in the project
-//
-//Maintainer: Miguel Luis and Gregory Cristian
-//*/
+/*
+ / _____)             _              | |
+( (____  _____ ____ _| |_ _____  ____| |__
+ \____ \| ___ |    (_   _) ___ |/ ___)  _ \
+ _____) ) ____| | | || |_| ____( (___| | | |
+(______/|_____)_|_|_| \__)_____)\____)_| |_|
+    (C)2013 Semtech
+
+Description: Bleeper board GPIO driver implementation
+
+License: Revised BSD License, see LICENSE.TXT file include in the project
+
+Maintainer: Miguel Luis and Gregory Cristian
+*/
 // /******************************************************************************
 //  * @file    mlm32l0xx_it.c
 //  * @author  MCD Application Team

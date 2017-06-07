@@ -1,62 +1,62 @@
 /*
  / _____)             _              | |
-( (____  _____ ____ _| |_ _____  ____| |__
+ ( (____  _____ ____ _| |_ _____  ____| |__
  \____ \| ___ |    (_   _) ___ |/ ___)  _ \
  _____) ) ____| | | || |_| ____( (___| | | |
-(______/|_____)_|_|_| \__)_____)\____)_| |_|
-    (C)2013 Semtech
+ (______/|_____)_|_|_| \__)_____)\____)_| |_|
+ (C)2013 Semtech
 
-Description: Ping-Pong implementation
+ Description: Ping-Pong implementation
 
-License: Revised BSD License, see LICENSE.TXT file include in the project
+ License: Revised BSD License, see LICENSE.TXT file include in the project
 
-Maintainer: Miguel Luis and Gregory Cristian
-*/
+ Maintainer: Miguel Luis and Gregory Cristian
+ */
 /******************************************************************************
-  * @file    main.c
-  * @author  MCD Application Team
-  * @version V1.1.0
-  * @date    27-February-2017
-  * @brief   this is the main!
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V. 
-  * All rights reserved.</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without 
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice, 
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other 
-  *    contributors to this software may be used to endorse or promote products 
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this 
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under 
-  *    this license is void and will automatically terminate your rights under 
-  *    this license. 
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS" 
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT 
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT 
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
+ * @file    main.c
+ * @author  MCD Application Team
+ * @version V1.1.0
+ * @date    27-February-2017
+ * @brief   this is the main!
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V.
+ * All rights reserved.</center></h2>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted, provided that the following conditions are met:
+ *
+ * 1. Redistribution of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of STMicroelectronics nor the names of other
+ *    contributors to this software may be used to endorse or promote products
+ *    derived from this software without specific written permission.
+ * 4. This software, including modifications and/or derivative works of this
+ *    software, must execute solely and exclusively on microcontroller or
+ *    microprocessor devices manufactured by or for STMicroelectronics.
+ * 5. Redistribution and use of this software other than as permitted under
+ *    this license is void and will automatically terminate your rights under
+ *    this license.
+ *
+ * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
+ * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
+ * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ ******************************************************************************
+ */
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
@@ -106,49 +106,40 @@ Maintainer: Miguel Luis and Gregory Cristian
 /* Private function prototypes -----------------------------------------------*/
 
 /* call back when LoRa will transmit a frame*/
-static void LoraTxData( lora_AppData_t *AppData, FunctionalState* IsTxConfirmed);
+static void LoraTxData(lora_AppData_t *AppData, FunctionalState* IsTxConfirmed);
 
 /* call back when LoRa has received a frame*/
-static void LoraRxData( lora_AppData_t *AppData);
+static void LoraRxData(lora_AppData_t *AppData);
 
 /* Private variables ---------------------------------------------------------*/
 /* load call backs*/
-static LoRaMainCallback_t LoRaMainCallbacks ={ HW_GetBatteryLevel,
-                                               HW_GetUniqueId,
-                                               HW_GetRandomSeed,
-                                               LoraTxData,
-                                               LoraRxData};
+static LoRaMainCallback_t LoRaMainCallbacks = { HW_GetBatteryLevel,
+		HW_GetUniqueId, HW_GetRandomSeed, LoraTxData, LoraRxData };
 
 /*!
  * Specifies the state of the application LED
  */
 static uint8_t AppLedStateOn = RESET;
 
-
 #ifdef USE_B_L072Z_LRWAN1
 /*!
  * Timer to handle the application Tx Led to toggle
  */
 static TimerEvent_t TxLedTimer;
-static void OnTimerLedEvent( void );
+static void OnTimerLedEvent(void);
 #endif
 /* !
  *Initialises the Lora Parameters
  */
-static  LoRaParam_t LoRaParamInit= {TX_ON_TIMER,
-                                    APP_TX_DUTYCYCLE,
-                                    CLASS_A,
-                                    LORAWAN_ADR_ON,
-                                    DR_0,
-                                    LORAWAN_PUBLIC_NETWORK };
+static LoRaParam_t LoRaParamInit = { TX_ON_TIMER,
+APP_TX_DUTYCYCLE, CLASS_A,
+LORAWAN_ADR_ON,
+DR_0,
+LORAWAN_PUBLIC_NETWORK };
 
 /**
  * Main application entry point.
  */
-
-#define RXBUFFSIZE 15
-char RxBuf[RXBUFFSIZE];
-char buffer[200];
 
 extern UART_HandleTypeDef huart1;
 __IO ITStatus UartReady = RESET;
@@ -162,7 +153,7 @@ __IO ITStatus UartReady = RESET;
 #define RF_FREQUENCY                                915000000 // Hz
 
 #else
-    #error "Please define a frequency band in the compiler options."
+#error "Please define a frequency band in the compiler options."
 #endif
 
 #define TX_OUTPUT_POWER                             14        // dBm
@@ -170,14 +161,14 @@ __IO ITStatus UartReady = RESET;
 #if defined( USE_MODEM_LORA )
 
 #define LORA_BANDWIDTH                              0         // [0: 125 kHz,
-                                                              //  1: 250 kHz,
-                                                              //  2: 500 kHz,
-                                                              //  3: Reserved]
+//  1: 250 kHz,
+//  2: 500 kHz,
+//  3: Reserved]
 #define LORA_SPREADING_FACTOR                       7         // [SF7..SF12]
 #define LORA_CODINGRATE                             1         // [1: 4/5,
-                                                              //  2: 4/6,
-                                                              //  3: 4/7,
-                                                              //  4: 4/8]
+//  2: 4/6,
+//  3: 4/7,
+//  4: 4/8]
 #define LORA_PREAMBLE_LENGTH                        8         // Same for Tx and Rx
 #define LORA_SYMBOL_TIMEOUT                         5         // Symbols
 #define LORA_FIX_LENGTH_PAYLOAD_ON                  false
@@ -193,18 +184,12 @@ __IO ITStatus UartReady = RESET;
 #define FSK_FIX_LENGTH_PAYLOAD_ON                   false
 
 #else
-    #error "Please define a modem in the compiler options."
+#error "Please define a modem in the compiler options."
 #endif
 
-typedef enum
-{
-    LOWPOWER,
-    RX,
-    RX_TIMEOUT,
-    RX_ERROR,
-    TX,
-    TX_TIMEOUT,
-}States_t;
+typedef enum {
+	LOWPOWER, RX, RX_TIMEOUT, RX_ERROR, TX, TX_TIMEOUT,
+} States_t;
 
 #define RX_TIMEOUT_VALUE                            1000
 #define BUFFER_SIZE                                 64 // Define the payload size here
@@ -219,6 +204,8 @@ typedef enum
 
 const uint8_t PingMsg[] = "PING";
 const uint8_t PongMsg[] = "PONG";
+uint8_t ReadyMsg[] = "READY";
+uint8_t OKMsg[] = "OK";
 
 uint16_t BufferSize = BUFFER_SIZE;
 uint8_t Buffer[BUFFER_SIZE];
@@ -228,8 +215,8 @@ States_t State = LOWPOWER;
 int8_t RssiValue = 0;
 int8_t SnrValue = 0;
 
- /* Led Timers objects*/
-static  TimerEvent_t timerLed;
+/* Led Timers objects*/
+static TimerEvent_t timerLed;
 
 /* Private function prototypes -----------------------------------------------*/
 /*!
@@ -240,32 +227,32 @@ static RadioEvents_t RadioEvents;
 /*!
  * \brief Function to be executed on Radio Tx Done event
  */
-void OnTxDone( void );
+void OnTxDone(void);
 
 /*!
  * \brief Function to be executed on Radio Rx Done event
  */
-void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr );
+void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr);
 
 /*!
  * \brief Function executed on Radio Tx Timeout event
  */
-void OnTxTimeout( void );
+void OnTxTimeout(void);
 
 /*!
  * \brief Function executed on Radio Rx Timeout event
  */
-void OnRxTimeout( void );
+void OnRxTimeout(void);
 
 /*!
  * \brief Function executed on Radio Rx Error event
  */
-void OnRxError( void );
+void OnRxError(void);
 
 /*!
  * \brief Function executed on when led timer elapses
  */
-static void OnledEvent( void );
+static void OnledEvent(void);
 /**
  * Main application entry point.
  */
@@ -274,27 +261,32 @@ static void OnledEvent( void );
 extern SPI_HandleTypeDef hspi2;
 
 /* Buffer used for transmission */
-#define BUFFERSIZE                       77
+#define BUFFERSIZE                       8
 //#define BUFFERSIZE                       (COUNTOF(aTxBuffer) - 1)
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 /* Buffer used for transmission */
-uint8_t aTxBuffer[] = "****SPI - Two Boards communication based on Interrupt **** SPI Message ******** SPI Message ******** SPI Message ****";
+uint8_t aTxBuffer[] =
+		"****SPI - Two Boards communication based on Interrupt **** SPI Message ******** SPI Message ******** SPI Message ****";
 
 /* Buffer used for reception */
 uint8_t aRxBuffer[BUFFERSIZE];
+uint8_t pruebBuff[BUFFERSIZE];
+uint8_t i;
 
-#define RXBUFFSIZE 15
+#define RXBUFFSIZE 77
 char RxBuf[RXBUFFSIZE];
 char buffer[200];
 
 extern UART_HandleTypeDef huart1;
 //__IO ITStatus UartReady = RESET;
 
-int main( void )
-{
-	bool isMaster = true;
-	uint8_t i;
+int recibidoMaster = 0;
+int recibidoSlave = 0;
+int enviadoReady = 0;
+int errorReady = 0;
+
+int main(void) {
 
 	HAL_Init();
 	/* SysTick_IRQn interrupt configuration */
@@ -308,14 +300,7 @@ int main( void )
 	SPI_Config();
 	SPI_Init();
 
-	HAL_Delay(10);
-	/*Error Overrun*/
-//	if (HAL_SPI_Receive_IT(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE)!= HAL_OK) {
-//		/* Transfer error in transmission process */
-//		Error_Handler();
-//	}
-//	while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
-//	}
+//	HAL_Delay(10);
 
 	/* Configure the Lora Stack*/
 	lora_Init(&LoRaMainCallbacks, &LoRaParamInit);
@@ -349,143 +334,179 @@ int main( void )
 	Radio.SetRxConfig(MODEM_LORA, LORA_BANDWIDTH, LORA_SPREADING_FACTOR,
 	LORA_CODINGRATE, 0, LORA_PREAMBLE_LENGTH,
 	LORA_SYMBOL_TIMEOUT, LORA_FIX_LENGTH_PAYLOAD_ON, 0, true, 0, 0,
-			LORA_IQ_INVERSION_ON, true);
-
-#elif defined( USE_MODEM_FSK )
-
-	Radio.SetTxConfig( MODEM_FSK, TX_OUTPUT_POWER, FSK_FDEV, 0,
-			FSK_DATARATE, 0,
-			FSK_PREAMBLE_LENGTH, FSK_FIX_LENGTH_PAYLOAD_ON,
-			true, 0, 0, 0, 3000000 );
-
-	Radio.SetRxConfig( MODEM_FSK, FSK_BANDWIDTH, FSK_DATARATE,
-			0, FSK_AFC_BANDWIDTH, FSK_PREAMBLE_LENGTH,
-			0, FSK_FIX_LENGTH_PAYLOAD_ON, 0, true,
-			0, 0,false, true );
-
-#else
-#error "Please define a frequency band in the compiler options."
+	LORA_IQ_INVERSION_ON, true);
 #endif
 
+	//Establece la radio en modo de recepcion durante un tiempo
 	Radio.Rx( RX_TIMEOUT_VALUE);
 
+	/* Master */
+	bool isMaster = true;
+	/* Slave */
+//	bool isMaster = false;
+//	if (HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 1000) == HAL_OK) {
+//
+//		PRINTF("%s\r\n", aRxBuffer);
+//		if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 1000) == HAL_OK) {
+//			PRINTF("Transmitido OK\r\n");
+//		} else {
+//			PRINTF("Error transmitiendo\r\n");
+//		}
+//	} else {
+//		PRINTF("Error recibiendo\r\n");
+//	}
 	while (1) {
+		//Si recibe READY, entonces mandar el msg.
+		//Una vez mandado esperar hasta recibir un OK.
 		/* run the LoRa class A state machine*/
 //		lora_fsm();
-		HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 10);
-		PRINTF("%s", aRxBuffer);
-		memset(aRxBuffer,'\0',BUFFERSIZE);
-//		switch (State) {
-//		case RX:
-//			if (isMaster == true) {
-//				if (BufferSize > 0) {
-//					if (strncmp((const char*) Buffer, (const char*) PongMsg, 4)	== 0) {
-//						TimerStop(&timerLed);
-//						LED_Off(LED_BLUE);
-//						LED_Off(LED_GREEN);
-//						LED_Off(LED_RED1);
-//						// Indicates on a LED that the received frame is a PONG
-//						LED_Toggle(LED_RED2);
+//		Radio.Send(aRxBuffer, BufferSize);
+//		memset(aRxBuffer,'\0',BUFFERSIZE);
+//		if (HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 1000) == HAL_OK) {
 //
-//						// Send the next PING frame
-//						Buffer[0] = 'P';
-//						Buffer[1] = 'I';
-//						Buffer[2] = 'N';
-//						Buffer[3] = 'G';
-//						// We fill the buffer with numbers for the payload
-//						for (i = 4; i < BufferSize; i++) {
-//							Buffer[i] = i - 4;
-//						}
-//						PRINTF("...PING\n");
-//
-//						DelayMs(1);
-//						Radio.Send(Buffer, BufferSize);
-//					} else if (strncmp((const char*) Buffer, (const char*) PingMsg, 4) == 0) { // A master already exists then become a slave
-//						isMaster = false;
-//						//GpioWrite( &Led2, 1 ); // Set LED off
-//						Radio.Rx( RX_TIMEOUT_VALUE);
-//					} else // valid reception but neither a PING or a PONG message
-//					{    // Set device as master ans start again
-//						isMaster = true;
-//						Radio.Rx( RX_TIMEOUT_VALUE);
-//					}
-//				}
+//			PRINTF("%s\r\n", aRxBuffer);
+//			if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 1000) == HAL_OK) {
+//				PRINTF("Transmitido OK\r\n");
 //			} else {
-//				if (BufferSize > 0) {
-//					if (strncmp((const char*) Buffer, (const char*) PingMsg, 4) == 0) {
-//						// Indicates on a LED that the received frame is a PING
-//						TimerStop(&timerLed);
-//						LED_Off(LED_RED1);
-//						LED_Off(LED_RED2);
-//						LED_Off(LED_GREEN);
-//						LED_Toggle(LED_BLUE);
-//
-//						// Send the reply to the PONG string
-//						Buffer[0] = 'P';
-//						Buffer[1] = 'O';
-//						Buffer[2] = 'N';
-//						Buffer[3] = 'G';
-//						// We fill the buffer with numbers for the payload
-//						for (i = 4; i < BufferSize; i++) {
-//							Buffer[i] = i - 4;
-//						}
-//						DelayMs(1);
-//
+//				PRINTF("Error transmitiendo\r\n");
+//			}
+//		} else {
+//			PRINTF("Error recibiendo\r\n");
+//		}
+//		DelayMs(1000);
+//		HAL_Delay(1000);
+//		Radio.Send(ReadyMsg, 5);
+//		PRINTF("Ready Master Send\r\n");
+
+		switch (State) {
+		case RX:
+			PRINTF("RX\r\n");
+			if (isMaster == true) {
+//				if (enviadoReady == 0) {
+//					Radio.Send(ReadyMsg, 5);
+//					PRINTF("Ready Master Send\r\n");
+//				} else if (enviadoReady == 1) {
+					if (BufferSize > 0) {
+						PRINTF(" Master: %s\r\n", Buffer);
+						if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) {
+							PRINTF("Ready Master Receive\r\n");
+							enviadoReady = 1;
+							TimerStop(&timerLed);
+							LED_Off(LED_BLUE);
+							LED_Off(LED_GREEN);
+							LED_Off(LED_RED1);
+							// Indicates on a LED that the received frame is a PONG
+							LED_Toggle(LED_RED2);
+
+							DelayMs(1);
+							strcpy(pruebBuff, "LAR");
+							Radio.Send(pruebBuff, BUFFERSIZE);
+							Radio.Rx( RX_TIMEOUT_VALUE);
+							recibidoMaster = 1;
+							errorReady = 1;
+							PRINTF("PrimerComandoEnviado Master\r\n");
+						}
+						if ((recibidoMaster == 1)&& (strncmp((const char*) Buffer,(const char*) OKMsg, 2) == 0)) {
+							DelayMs(1);
+							strcpy(pruebBuff, "LAR");
+							Radio.Send(pruebBuff, BUFFERSIZE);
+							Radio.Rx( RX_TIMEOUT_VALUE);
+							PRINTF("Enviando LAR\r\n");
+						}
+						Radio.Rx( RX_TIMEOUT_VALUE);
+						memset(Buffer,'\0',BUFFER_SIZE);
+					}
+			} else {
+				if (BufferSize > 0) {
+					PRINTF("Slave: %s\r\n", Buffer);
+					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) {
+						// Indicates on a LED that the received frame is a PING
+						TimerStop(&timerLed);
+						LED_Off(LED_RED1);
+						LED_Off(LED_RED2);
+						LED_Off(LED_GREEN);
+						LED_Toggle(LED_BLUE);
+//						enviadoReady = 1;
+						Radio.Send(ReadyMsg, 5);
 //						Radio.Send(Buffer, BufferSize);
-//						PRINTF("...PONG\n");
-//					} else // valid reception but not a PING as expected
-//					{    // Set device as master and start again
-//						isMaster = true;
-//						Radio.Rx( RX_TIMEOUT_VALUE);
-//					}
+						PRINTF("Slave Ready\r\n");
+						recibidoSlave = 1;
+//						enviadoReady = 1;
+						PRINTF("PrimerComandoEnviadoSlave\r\n");
+						Radio.Rx( RX_TIMEOUT_VALUE);
+					}
+					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer, (const char*) "LAR", 8) == 0))
+					{ // Set device as master and start again
+						Radio.Send(OKMsg, 2);
+						PRINTF("OK\r\n");
+						Radio.Rx( RX_TIMEOUT_VALUE);
+					}
+					Radio.Rx( RX_TIMEOUT_VALUE);
+					memset(Buffer,'\0',BUFFER_SIZE);
+				}
+			}
+			State = LOWPOWER;
+			break;
+		case TX:
+//			PRINTF("TX\r\n");
+			Radio.Rx( RX_TIMEOUT_VALUE);
+			State = LOWPOWER;
+			break;
+		case RX_TIMEOUT:
+//			PRINTF("RX_TIMEOUT\r\n");
+		case RX_ERROR:
+			if (isMaster == true) {
+				if (enviadoReady == 0)
+				{
+					Radio.Send(ReadyMsg, 5);
+					PRINTF("Master Ready\r\n");
+				}
+				if (errorReady == 1)
+				{
+					PRINTF("RX_ERROR\r\n");
+					Radio.Send("LAR", 5);
+//					PRINTF("Master Ready\r\n");
+//					errorReady = 1;
+				}
+				// Send the next PING frame
+				DelayMs(1);
+				Radio.Rx( RX_TIMEOUT_VALUE);
+			} else {
+//				Radio.Send(OKMsg, 2);
+//				PRINTF("OK Slave Send\r\n");
+				Radio.Rx( RX_TIMEOUT_VALUE);
+			}
+			State = LOWPOWER;
+			break;
+		case TX_TIMEOUT:
+			PRINTF("TX_TIMEOUT\r\n");
+//			if (isMaster == true) {
+//				if (enviadoReady == 1)
+//				{
+//					Radio.Send("LAR", 3);
+//					PRINTF("TX_TIMEOUT\r\n");
 //				}
 //			}
+
+			Radio.Rx( RX_TIMEOUT_VALUE);
 //			State = LOWPOWER;
-//			break;
-//		case TX:
-//			// Indicates on a LED that we have sent a PING [Master]
-//			// Indicates on a LED that we have sent a PONG [Slave]
-//			//GpioWrite( &Led2, GpioRead( &Led2 ) ^ 1 );
-//			Radio.Rx( RX_TIMEOUT_VALUE);
-//			State = LOWPOWER;
-//			break;
-//		case RX_TIMEOUT:
-//		case RX_ERROR:
-//			if (isMaster == true) {
-//				// Send the next PING frame
-//				Buffer[0] = 'P';
-//				Buffer[1] = 'I';
-//				Buffer[2] = 'N';
-//				Buffer[3] = 'G';
-//				for (i = 4; i < BufferSize; i++) {
-//					Buffer[i] = i - 4;
-//				}
-//				DelayMs(1);
-//				Radio.Send(Buffer, BufferSize);
-//			} else {
-//				Radio.Rx( RX_TIMEOUT_VALUE);
-//			}
-//			State = LOWPOWER;
-//			break;
-//		case TX_TIMEOUT:
-//			Radio.Rx( RX_TIMEOUT_VALUE);
-//			State = LOWPOWER;
-//			break;
-//		case LOWPOWER:
-//		default:
-//			// Set low power
-//			break;
-//		}
-//
-//		DISABLE_IRQ( );
-//		/* if an interupt has occured after __disable_irq, it is kept pending
-//		 * and cortex will not enter low power anyway  */
-//		if (State == LOWPOWER) {
-//#ifndef LOW_POWER_DISABLE
-//			LowPower_Handler();
-//#endif
-//		}
-//		ENABLE_IRQ( );
+			break;
+		case LOWPOWER:
+//			PRINTF("LOWPOWER\r\n");
+		default:
+			// Set low power
+			break;
+		}
+
+		DISABLE_IRQ( );
+		/* if an interupt has occured after __disable_irq, it is kept pending
+		 * and cortex will not enter low power anyway  */
+		if (State == LOWPOWER) {
+#ifndef LOW_POWER_DISABLE
+			LowPower_Handler();
+#endif
+		}
+		ENABLE_IRQ( );
 
 	}
 }
@@ -493,7 +514,7 @@ int main( void )
 void OnTxDone(void) {
 	Radio.Sleep();
 	State = TX;
-//	PRINTF("OnTxDone\n");
+	PRINTF("OnTxDone\n");
 }
 
 void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
@@ -504,8 +525,8 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
 	SnrValue = snr;
 	State = RX;
 
-//	PRINTF("OnRxDone\n");
-//	PRINTF("RssiValue=%d dBm, SnrValue=%d\n", rssi, snr);
+	PRINTF("OnRxDone\n");
+	PRINTF("RssiValue=%d dBm, SnrValue=%d\n", rssi, snr);
 }
 
 void OnTxTimeout(void) {
@@ -524,7 +545,7 @@ void OnRxTimeout(void) {
 void OnRxError(void) {
 	Radio.Sleep();
 	State = RX_ERROR;
-//	PRINTF("OnRxError\n");
+	PRINTF("OnRxError\n");
 }
 
 static void OnledEvent(void) {
@@ -678,5 +699,4 @@ static void OnTimerLedEvent(void) {
 	LED_Off(LED_RED1);
 }
 #endif
-
 

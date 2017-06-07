@@ -54,7 +54,7 @@
 //	HAL_NVIC_SetPriority(USART1_IRQn, 0x1, 0);
 //	HAL_NVIC_EnableIRQ(USART1_IRQn);
 //}
-extern char RxBuf[];
+//extern char RxBuf[];
 //extern __IO ITStatus UartReady;
 //char *linea = "$pSR,f,a,5,6,a\n\r";
 //
@@ -145,13 +145,13 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 {
 //	SPIReady = SET;
 //	HAL_SPI_Transmit_IT(&hspi2, (uint8_t*) aTxBuf, BUFFERSIZE);
-	PRINTF("%s\n\r", RxBuf);
-	if (HAL_SPI_Receive_IT(&hspi2, (uint8_t *) RxBuf, strlen(RxBuf))!= HAL_OK) {
-		/* Transfer error in transmission process */
-		Error_Handler();
-	}
-	while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
-	}
+//	PRINTF("%s\n\r", RxBuf);
+//	if (HAL_SPI_Receive_IT(&hspi2, (uint8_t *) RxBuf, strlen(RxBuf))!= HAL_OK) {
+//		/* Transfer error in transmission process */
+//		Error_Handler();
+//	}
+//	while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
+//	}
 }
 
 /**

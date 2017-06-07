@@ -77,16 +77,16 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define VREFINT_CAL       ((uint16_t*) ((uint32_t) 0x1FF80078))
 #define LORAWAN_MAX_BAT   254
 
-static ADC_HandleTypeDef hadc;
-/*!
- * Flag to indicate if the ADC is Initialized
- */
-static bool AdcInitialized = false;
-
-/*!
- * Flag to indicate if the MCU is Initialized
- */
-static bool McuInitialized = false;
+//static ADC_HandleTypeDef hadc;
+///*!
+// * Flag to indicate if the ADC is Initialized
+// */
+//static bool AdcInitialized = false;
+//
+///*!
+// * Flag to indicate if the MCU is Initialized
+// */
+//static bool McuInitialized = false;
 
 ///**
 //  * @brief This function initializes the hardware
