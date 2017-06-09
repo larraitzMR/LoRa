@@ -30,4 +30,5 @@ void gps_Init(void);
 
 void SPI_Init();
 void SPI_Config(void);
+void Flush_Buffer(uint8_t* pBuffer, uint16_t BufferLength);
 uint16_t Buffercmp(uint8_t *pBuffer1, uint8_t *pBuffer2, uint16_t BufferLength);

@@ -261,7 +261,7 @@ static void OnledEvent(void);
 extern SPI_HandleTypeDef hspi2;
 
 /* Buffer used for transmission */
-#define BUFFERSIZE                       8
+#define BUFFERSIZE                       10
 //#define BUFFERSIZE                       (COUNTOF(aTxBuffer) - 1)
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
@@ -273,6 +273,8 @@ uint8_t aTxBuffer[] =
 uint8_t aRxBuffer[BUFFERSIZE];
 uint8_t pruebBuff[BUFFERSIZE];
 uint8_t i;
+uint8_t RxReady[5];
+uint8_t RxOK[5];
 
 #define RXBUFFSIZE 77
 char RxBuf[RXBUFFSIZE];
@@ -283,6 +285,7 @@ extern UART_HandleTypeDef huart1;
 
 int recibidoMaster = 0;
 int recibidoSlave = 0;
+int recibidoReady = 0;
 int enviadoReady = 0;
 int errorReady = 0;
 
@@ -356,157 +359,208 @@ int main(void) {
 //		PRINTF("Error recibiendo\r\n");
 //	}
 	while (1) {
-		//Si recibe READY, entonces mandar el msg.
-		//Una vez mandado esperar hasta recibir un OK.
 		/* run the LoRa class A state machine*/
 //		lora_fsm();
 //		Radio.Send(aRxBuffer, BufferSize);
 //		memset(aRxBuffer,'\0',BUFFERSIZE);
-//		if (HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 1000) == HAL_OK) {
-//
+
+		/*Descomentar cuando funcione SPI*/
+
+		if (recibidoReady == 0) {
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+			if (HAL_SPI_Receive(&hspi2, (uint8_t *) RxReady, 5, 500) == HAL_OK) {
+				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+				if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5)	== 0) {
+					recibidoReady = 1;
+					sprintf(buffer, "\r\n%s\r\n", "Recibido Ready");
+					PRINTF("%s\r\n", buffer);
+					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+					if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 100)	== HAL_OK) {
+						PRINTF("Transmitido OK\r\n");
+					} else {
+						PRINTF("Error transmitiendo\r\n");
+					}
+					Flush_Buffer(RxReady, BUFFERSIZE);
+//					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+				}
+
+			}
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+		} else if (recibidoReady == 1){
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+			if (HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 10) == HAL_OK) {
+				PRINTF("%s\r\n", aRxBuffer);
+				Flush_Buffer(aRxBuffer, BUFFERSIZE);
+				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+				HAL_Delay(1000);
+				if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 100)	== HAL_OK) {
+//				if (HAL_SPI_TransmitReceive(&hspi2, pruebBuff,  (uint8_t *) OKMsg, 2, 100)	== HAL_OK) {
+					PRINTF("Transmitido OK\r\n");
+					PRINTF("%s\r\n", pruebBuff);
+				} else {
+					PRINTF("Error transmitiendo\r\n");
+				}
+				//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+				//			HAL_SPI_DeInit(&hspi2);
+			} else {
+				PRINTF("Error recibiendo\r\n");
+			}
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+		}
+
+
+
+// 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+//		if (HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 10) == HAL_OK) {
 //			PRINTF("%s\r\n", aRxBuffer);
-//			if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 1000) == HAL_OK) {
+//			Flush_Buffer(aRxBuffer,BUFFERSIZE);
+//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+//			HAL_Delay(1000);
+//			if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 100) == HAL_OK) {
 //				PRINTF("Transmitido OK\r\n");
 //			} else {
 //				PRINTF("Error transmitiendo\r\n");
 //			}
+////			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+////			HAL_SPI_DeInit(&hspi2);
 //		} else {
 //			PRINTF("Error recibiendo\r\n");
 //		}
+//		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 //		DelayMs(1000);
 //		HAL_Delay(1000);
-//		Radio.Send(ReadyMsg, 5);
-//		PRINTF("Ready Master Send\r\n");
 
-		switch (State) {
-		case RX:
-			PRINTF("RX\r\n");
-			if (isMaster == true) {
-//				if (enviadoReady == 0) {
-//					Radio.Send(ReadyMsg, 5);
-//					PRINTF("Ready Master Send\r\n");
-//				} else if (enviadoReady == 1) {
-					if (BufferSize > 0) {
-						PRINTF(" Master: %s\r\n", Buffer);
-						if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) {
-							PRINTF("Ready Master Receive\r\n");
-							enviadoReady = 1;
-							TimerStop(&timerLed);
-							LED_Off(LED_BLUE);
-							LED_Off(LED_GREEN);
-							LED_Off(LED_RED1);
-							// Indicates on a LED that the received frame is a PONG
-							LED_Toggle(LED_RED2);
-
-							DelayMs(1);
-							strcpy(pruebBuff, "LAR");
-							Radio.Send(pruebBuff, BUFFERSIZE);
-							Radio.Rx( RX_TIMEOUT_VALUE);
-							recibidoMaster = 1;
-							errorReady = 1;
-							PRINTF("PrimerComandoEnviado Master\r\n");
-						}
-						if ((recibidoMaster == 1)&& (strncmp((const char*) Buffer,(const char*) OKMsg, 2) == 0)) {
-							DelayMs(1);
-							strcpy(pruebBuff, "LAR");
-							Radio.Send(pruebBuff, BUFFERSIZE);
-							Radio.Rx( RX_TIMEOUT_VALUE);
-							PRINTF("Enviando LAR\r\n");
-						}
-						Radio.Rx( RX_TIMEOUT_VALUE);
-						memset(Buffer,'\0',BUFFER_SIZE);
-					}
-			} else {
-				if (BufferSize > 0) {
-					PRINTF("Slave: %s\r\n", Buffer);
-					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) {
-						// Indicates on a LED that the received frame is a PING
-						TimerStop(&timerLed);
-						LED_Off(LED_RED1);
-						LED_Off(LED_RED2);
-						LED_Off(LED_GREEN);
-						LED_Toggle(LED_BLUE);
-//						enviadoReady = 1;
-						Radio.Send(ReadyMsg, 5);
-//						Radio.Send(Buffer, BufferSize);
-						PRINTF("Slave Ready\r\n");
-						recibidoSlave = 1;
-//						enviadoReady = 1;
-						PRINTF("PrimerComandoEnviadoSlave\r\n");
-						Radio.Rx( RX_TIMEOUT_VALUE);
-					}
-					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer, (const char*) "LAR", 8) == 0))
-					{ // Set device as master and start again
-						Radio.Send(OKMsg, 2);
-						PRINTF("OK\r\n");
-						Radio.Rx( RX_TIMEOUT_VALUE);
-					}
-					Radio.Rx( RX_TIMEOUT_VALUE);
-					memset(Buffer,'\0',BUFFER_SIZE);
-				}
-			}
-			State = LOWPOWER;
-			break;
-		case TX:
-//			PRINTF("TX\r\n");
-			Radio.Rx( RX_TIMEOUT_VALUE);
-			State = LOWPOWER;
-			break;
-		case RX_TIMEOUT:
-//			PRINTF("RX_TIMEOUT\r\n");
-		case RX_ERROR:
-			if (isMaster == true) {
-				if (enviadoReady == 0)
-				{
-					Radio.Send(ReadyMsg, 5);
-					PRINTF("Master Ready\r\n");
-				}
-				if (errorReady == 1)
-				{
-					PRINTF("RX_ERROR\r\n");
-					Radio.Send("LAR", 5);
-//					PRINTF("Master Ready\r\n");
-//					errorReady = 1;
-				}
-				// Send the next PING frame
-				DelayMs(1);
-				Radio.Rx( RX_TIMEOUT_VALUE);
-			} else {
-//				Radio.Send(OKMsg, 2);
-//				PRINTF("OK Slave Send\r\n");
-				Radio.Rx( RX_TIMEOUT_VALUE);
-			}
-			State = LOWPOWER;
-			break;
-		case TX_TIMEOUT:
-			PRINTF("TX_TIMEOUT\r\n");
+//		switch (State) {
+//		case RX:
+//			PRINTF("RX\r\n");
 //			if (isMaster == true) {
-//				if (enviadoReady == 1)
-//				{
-//					Radio.Send("LAR", 3);
-//					PRINTF("TX_TIMEOUT\r\n");
+////				if (enviadoReady == 0) {
+////					Radio.Send(ReadyMsg, 5);
+////					PRINTF("Ready Master Send\r\n");
+////				} else if (enviadoReady == 1) {
+//					if (BufferSize > 0) {
+//						PRINTF(" Master: %s\r\n", Buffer);
+//						if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) {
+//							PRINTF("Ready Master Receive\r\n");
+//							enviadoReady = 1;
+//							TimerStop(&timerLed);
+//							LED_Off(LED_BLUE);
+//							LED_Off(LED_GREEN);
+//							LED_Off(LED_RED1);
+//							// Indicates on a LED that the received frame is a PONG
+//							LED_Toggle(LED_RED2);
+//
+//							DelayMs(1);
+//							strcpy(pruebBuff, "LAR");
+//							Radio.Send(pruebBuff, BUFFERSIZE);
+//							Radio.Rx( RX_TIMEOUT_VALUE);
+//							recibidoMaster = 1;
+//							errorReady = 1;
+//							PRINTF("PrimerComandoEnviado Master\r\n");
+//						}
+//						if ((recibidoMaster == 1)&& (strncmp((const char*) Buffer,(const char*) OKMsg, 2) == 0)) {
+//							DelayMs(1);
+//							strcpy(pruebBuff, "LAR");
+//							Radio.Send(pruebBuff, BUFFERSIZE);
+//							Radio.Rx( RX_TIMEOUT_VALUE);
+//							PRINTF("Enviando LAR\r\n");
+//						}
+//						Radio.Rx( RX_TIMEOUT_VALUE);
+//						memset(Buffer,'\0',BUFFER_SIZE);
+//					}
+//			} else {
+//				if (BufferSize > 0) {
+//					PRINTF("Slave: %s\r\n", Buffer);
+//					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) {
+//						// Indicates on a LED that the received frame is a PING
+//						TimerStop(&timerLed);
+//						LED_Off(LED_RED1);
+//						LED_Off(LED_RED2);
+//						LED_Off(LED_GREEN);
+//						LED_Toggle(LED_BLUE);
+////						enviadoReady = 1;
+//						Radio.Send(ReadyMsg, 5);
+////						Radio.Send(Buffer, BufferSize);
+//						PRINTF("Slave Ready\r\n");
+//						recibidoSlave = 1;
+////						enviadoReady = 1;
+//						PRINTF("PrimerComandoEnviadoSlave\r\n");
+//						Radio.Rx( RX_TIMEOUT_VALUE);
+//					}
+//					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer, (const char*) "LAR", 8) == 0))
+//					{ // Set device as master and start again
+//						Radio.Send(OKMsg, 2);
+//						PRINTF("OK\r\n");
+//						Radio.Rx( RX_TIMEOUT_VALUE);
+//					}
+//					Radio.Rx( RX_TIMEOUT_VALUE);
+//					memset(Buffer,'\0',BUFFER_SIZE);
 //				}
 //			}
-
-			Radio.Rx( RX_TIMEOUT_VALUE);
 //			State = LOWPOWER;
-			break;
-		case LOWPOWER:
-//			PRINTF("LOWPOWER\r\n");
-		default:
-			// Set low power
-			break;
-		}
-
-		DISABLE_IRQ( );
-		/* if an interupt has occured after __disable_irq, it is kept pending
-		 * and cortex will not enter low power anyway  */
-		if (State == LOWPOWER) {
-#ifndef LOW_POWER_DISABLE
-			LowPower_Handler();
-#endif
-		}
-		ENABLE_IRQ( );
+//			break;
+//		case TX:
+////			PRINTF("TX\r\n");
+//			Radio.Rx( RX_TIMEOUT_VALUE);
+//			State = LOWPOWER;
+//			break;
+//		case RX_TIMEOUT:
+////			PRINTF("RX_TIMEOUT\r\n");
+//		case RX_ERROR:
+//			if (isMaster == true) {
+//				if (enviadoReady == 0)
+//				{
+//					Radio.Send(ReadyMsg, 5);
+//					PRINTF("Master Ready\r\n");
+//				}
+//				if (errorReady == 1)
+//				{
+//					PRINTF("RX_ERROR\r\n");
+//					Radio.Send("LAR", 5);
+////					PRINTF("Master Ready\r\n");
+////					errorReady = 1;
+//				}
+//				// Send the next PING frame
+//				DelayMs(1);
+//				Radio.Rx( RX_TIMEOUT_VALUE);
+//			} else {
+////				Radio.Send(OKMsg, 2);
+////				PRINTF("OK Slave Send\r\n");
+//				Radio.Rx( RX_TIMEOUT_VALUE);
+//			}
+//			State = LOWPOWER;
+//			break;
+//		case TX_TIMEOUT:
+//			PRINTF("TX_TIMEOUT\r\n");
+////			if (isMaster == true) {
+////				if (enviadoReady == 1)
+////				{
+////					Radio.Send("LAR", 3);
+////					PRINTF("TX_TIMEOUT\r\n");
+////				}
+////			}
+//
+//			Radio.Rx( RX_TIMEOUT_VALUE);
+////			State = LOWPOWER;
+//			break;
+//		case LOWPOWER:
+////			PRINTF("LOWPOWER\r\n");
+//		default:
+//			// Set low power
+//			break;
+//		}
+//
+//		DISABLE_IRQ( );
+//		/* if an interupt has occured after __disable_irq, it is kept pending
+//		 * and cortex will not enter low power anyway  */
+//		if (State == LOWPOWER) {
+//#ifndef LOW_POWER_DISABLE
+//			LowPower_Handler();
+//#endif
+//		}
+//		ENABLE_IRQ( );
 
 	}
 }
