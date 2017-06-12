@@ -370,18 +370,19 @@ int main(void) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
 			if (HAL_SPI_Receive(&hspi2, (uint8_t *) RxReady, 5, 500) == HAL_OK) {
 				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+//				PRINTF("%s\r\n", RxReady);
 				if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5)	== 0) {
-					recibidoReady = 1;
 					sprintf(buffer, "\r\n%s\r\n", "Recibido Ready");
 					PRINTF("%s\r\n", buffer);
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
 					if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 100)	== HAL_OK) {
-						PRINTF("Transmitido OK\r\n");
+//						PRINTF("Transmitido OK\r\n");
+						recibidoReady = 1;
 					} else {
 						PRINTF("Error transmitiendo\r\n");
 					}
 					Flush_Buffer(RxReady, BUFFERSIZE);
-//					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 				}
 
 			}
@@ -396,8 +397,8 @@ int main(void) {
 				HAL_Delay(1000);
 				if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 100)	== HAL_OK) {
 //				if (HAL_SPI_TransmitReceive(&hspi2, pruebBuff,  (uint8_t *) OKMsg, 2, 100)	== HAL_OK) {
-					PRINTF("Transmitido OK\r\n");
-					PRINTF("%s\r\n", pruebBuff);
+//					PRINTF("Transmitido OK\r\n");
+//					PRINTF("%s\r\n", pruebBuff);
 				} else {
 					PRINTF("Error transmitiendo\r\n");
 				}
