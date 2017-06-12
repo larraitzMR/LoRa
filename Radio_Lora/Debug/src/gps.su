@@ -1,6 +1,6 @@
 gps.c:91:6:SPI_Config	32	static
-gps.c:117:6:SPI_Init	8	static
-gps.c:145:6:HAL_SPI_RxCpltCallback	16	static
-gps.c:163:6:HAL_SPI_TxCpltCallback	16	static
-gps.c:175:10:Buffercmp	24	static
-gps.c:196:6:Flush_Buffer	16	static
+gps.c:121:6:SPI_Init	8	static
+gps.c:149:6:HAL_SPI_RxCpltCallback	16	static
+gps.c:167:6:HAL_SPI_TxCpltCallback	16	static
+gps.c:179:10:Buffercmp	24	static
+gps.c:200:6:Flush_Buffer	16	static

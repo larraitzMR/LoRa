@@ -261,13 +261,12 @@ static void OnledEvent(void);
 extern SPI_HandleTypeDef hspi2;
 
 /* Buffer used for transmission */
-#define BUFFERSIZE                       10
+#define BUFFERSIZE                       30
 //#define BUFFERSIZE                       (COUNTOF(aTxBuffer) - 1)
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 /* Buffer used for transmission */
-uint8_t aTxBuffer[] =
-		"****SPI - Two Boards communication based on Interrupt **** SPI Message ******** SPI Message ******** SPI Message ****";
+uint8_t aTxBuffer[] ="***Larraitz";
 
 /* Buffer used for reception */
 uint8_t aRxBuffer[BUFFERSIZE];
@@ -347,35 +346,32 @@ int main(void) {
 	bool isMaster = true;
 	/* Slave */
 //	bool isMaster = false;
-//	if (HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 1000) == HAL_OK) {
-//
-//		PRINTF("%s\r\n", aRxBuffer);
-//		if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 1000) == HAL_OK) {
-//			PRINTF("Transmitido OK\r\n");
-//		} else {
-//			PRINTF("Error transmitiendo\r\n");
-//		}
-//	} else {
-//		PRINTF("Error recibiendo\r\n");
-//	}
+
 	while (1) {
 		/* run the LoRa class A state machine*/
 //		lora_fsm();
 //		Radio.Send(aRxBuffer, BufferSize);
 //		memset(aRxBuffer,'\0',BUFFERSIZE);
 
+//		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+//		HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)aTxBuffer, (uint8_t *)aRxBuffer, 40, 5000);
+//		while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
+//		}
+//		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+//		PRINTF("%s\r\n", aRxBuffer);
+
 		/*Descomentar cuando funcione SPI*/
 
 		if (recibidoReady == 0) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-			if (HAL_SPI_Receive(&hspi2, (uint8_t *) RxReady, 5, 500) == HAL_OK) {
+			if (HAL_SPI_Receive(&hspi2, (uint8_t *) RxReady, 5, 5) == HAL_OK) {
 				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 //				PRINTF("%s\r\n", RxReady);
 				if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5)	== 0) {
 					sprintf(buffer, "\r\n%s\r\n", "Recibido Ready");
-					PRINTF("%s\r\n", buffer);
+//					PRINTF("%s\r\n", buffer);
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-					if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 100)	== HAL_OK) {
+					if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 5)	== HAL_OK) {
 //						PRINTF("Transmitido OK\r\n");
 						recibidoReady = 1;
 					} else {
@@ -389,13 +385,13 @@ int main(void) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 		} else if (recibidoReady == 1){
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-			if (HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 10) == HAL_OK) {
+			if (HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 5) == HAL_OK) {
 				PRINTF("%s\r\n", aRxBuffer);
 				Flush_Buffer(aRxBuffer, BUFFERSIZE);
 				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
 				HAL_Delay(1000);
-				if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 100)	== HAL_OK) {
+				if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 5)	== HAL_OK) {
 //				if (HAL_SPI_TransmitReceive(&hspi2, pruebBuff,  (uint8_t *) OKMsg, 2, 100)	== HAL_OK) {
 //					PRINTF("Transmitido OK\r\n");
 //					PRINTF("%s\r\n", pruebBuff);
