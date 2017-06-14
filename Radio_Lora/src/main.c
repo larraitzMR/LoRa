@@ -1,61 +1,5 @@
 /*
- / _____)             _              | |
- ( (____  _____ ____ _| |_ _____  ____| |__
- \____ \| ___ |    (_   _) ___ |/ ___)  _ \
- _____) ) ____| | | || |_| ____( (___| | | |
- (______/|_____)_|_|_| \__)_____)\____)_| |_|
- (C)2013 Semtech
 
- Description: Ping-Pong implementation
-
- License: Revised BSD License, see LICENSE.TXT file include in the project
-
- Maintainer: Miguel Luis and Gregory Cristian
- */
-/******************************************************************************
- * @file    main.c
- * @author  MCD Application Team
- * @version V1.1.0
- * @date    27-February-2017
- * @brief   this is the main!
- ******************************************************************************
- * @attention
- *
- * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics International N.V.
- * All rights reserved.</center></h2>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted, provided that the following conditions are met:
- *
- * 1. Redistribution of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of STMicroelectronics nor the names of other
- *    contributors to this software may be used to endorse or promote products
- *    derived from this software without specific written permission.
- * 4. This software, including modifications and/or derivative works of this
- *    software, must execute solely and exclusively on microcontroller or
- *    microprocessor devices manufactured by or for STMicroelectronics.
- * 5. Redistribution and use of this software other than as permitted under
- *    this license is void and will automatically terminate your rights under
- *    this license.
- *
- * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
- * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
- * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- ******************************************************************************
  */
 
 /* Includes ------------------------------------------------------------------*/
@@ -291,6 +235,14 @@ int errorReady = 0;
 int transmite = 0;
 int estado = 0;
 
+
+struct datosMicro {
+	char datos[200];
+};
+
+struct datosMicro misDat[50];
+int dat = 0;
+
 int main(void) {
 
 	HAL_Init();
@@ -356,76 +308,68 @@ int main(void) {
 //		Radio.Send(aRxBuffer, BufferSize);
 //		memset(aRxBuffer,'\0',BUFFERSIZE);
 
+		/*Esto funciona*/
+//		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+//		HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)ReadyMsg, (uint8_t *)RxReady, 5, 3000);
+//		while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
+//		}
+//		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+//		PRINTF("%s\r\n", RxReady);
+//		Flush_Buffer(RxReady, BUFFERSIZE);
+
+
 		if (recibidoReady == 0) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-//			if (HAL_SPI_TransmitReceive(&hspi2, aTxBuffer, (uint8_t *) RxReady, 5, 5) == HAL_OK) {
-			if (HAL_SPI_Receive(&hspi2, (uint8_t *) RxReady, 5, 5) == HAL_OK) {
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-//				PRINTF("%s\r\n", RxReady);
-				if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5)	== 0) {
-					sprintf(buffer, "\r\n%s\r\n", "Recibido Ready");
-//					PRINTF("%s\r\n", buffer);
-					Flush_Buffer(RxReady, 5);
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-					if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 5)	== HAL_OK) {
-						while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {}
-//						PRINTF("Transmitido OK\r\n");
-						recibidoReady = 1;
-					} else {
-						PRINTF("Error transmitiendo\r\n");
-					}
-//					Flush_Buffer(RxReady, BUFFERSIZE);
-//					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-				}
-
-			}
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-		} else if (recibidoReady == 1){
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-			if (HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 5) == HAL_OK) {
+			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)ReadyMsg, (uint8_t *)RxReady, 5, 3000) == HAL_OK) {
 				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {}
-				PRINTF("%s\r\n", aRxBuffer);
-				strncpy(buffLora, aRxBuffer,BUFFERSIZE);
-				Flush_Buffer(aRxBuffer, BUFFERSIZE);
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-//				if (strncmp((const char*) aRxBuffer, (const char*) "Larraitz", 8) == 0) {
-//
-//				}
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-				HAL_Delay(50);
-				if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 5)	== HAL_OK) {
-//				if (HAL_SPI_TransmitReceive(&hspi2, pruebBuff,  (uint8_t *) OKMsg, 2, 100)	== HAL_OK) {
-//					PRINTF("Transmitido OK\r\n");
-//					PRINTF("%s\r\n", pruebBuff);
-					transmite = 1;
-				} else {
-					PRINTF("Error transmitiendo\r\n");
-				}
-				//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-				//			HAL_SPI_DeInit(&hspi2);
-			} else {
-				PRINTF("Error recibiendo\r\n");
+				PRINTF("%s\r\n", RxReady);
+				if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5)	== 0) {
+					Flush_Buffer(RxReady, 5);
+					recibidoReady = 1;
 			}
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 		}
-
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-
-//		switch (estado)		{
-//		case 0:
+//		} else if (recibidoReady == 1) {
 //			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-//			if (HAL_SPI_Receive(&hspi2, (uint8_t *) RxReady, 5, 5) == HAL_OK) {
-//				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {}
+//			if (HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 5) == HAL_OK) {
+//				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
+//				}
+//				strncpy(buffLora, aRxBuffer, BUFFERSIZE);
+//				strncpy(misDat[dat].datos, aRxBuffer, BUFFERSIZE);
+//				Flush_Buffer(aRxBuffer, BUFFERSIZE);
+//				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+////				if (strncmp((const char*) aRxBuffer, (const char*) "Larraitz", 8) == 0) {
+////
+////				}
+//				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+//				HAL_Delay(50);
+//				if (HAL_SPI_Transmit(&hspi2, (uint8_t *) OKMsg, 2, 5) == HAL_OK) {
+////				if (HAL_SPI_TransmitReceive(&hspi2, pruebBuff,  (uint8_t *) OKMsg, 2, 100)	== HAL_OK) {
+////					PRINTF("Transmitido OK\r\n");
+////					PRINTF("%s\r\n", pruebBuff);
+//					transmite = 1;
+//					PRINTF("%s\r\n", misDat[dat].datos);
+//					dat++;
+//					if (dat == 50)
+//					{
+//						dat = 0;
+//					}
+//				} else {
+//					PRINTF("Error transmitiendo\r\n");
+//				}
+//				//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+//				//			HAL_SPI_DeInit(&hspi2);
+//			} else {
+//				PRINTF("Error recibiendo\r\n");
 //			}
 //			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-//			if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5)== 0) {
-//				sprintf(buffer, "\r\n%s\r\n", "Recibido Ready");
-//				estado = 1;
-//			}
-//			break;
-//		case 1:
 //
+////			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+////			HAL_SPI_Transmit(&hspi2, (uint8_t *) "", 1, 5);
+////			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 //		}
+//
+//		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 
 
 //		if (transmite == 1)
