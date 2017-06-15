@@ -218,6 +218,7 @@ uint8_t buffLora[BUFFERSIZE];
 uint8_t pruebBuff[BUFFERSIZE];
 uint8_t i;
 uint8_t RxReady[5];
+uint8_t parsingBuff[BUFFERSIZE];
 uint8_t RxOK[5];
 
 #define RXBUFFSIZE 77
@@ -324,12 +325,28 @@ int main(void) {
 				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {}
 				PRINTF("%s\r\n", RxReady);
 				if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5)	== 0) {
-					Flush_Buffer(RxReady, 5);
+//					Flush_Buffer(RxReady, 5);
 					recibidoReady = 1;
+					PRINTF("Recibido Ready\r\n");
+				}
 			}
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 		}
-//		} else if (recibidoReady == 1) {
+		else if (recibidoReady == 1) {
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) OKMsg, (uint8_t *) parsingBuff, 13, 3000) == HAL_OK) {
+				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {}
+				PRINTF("%s\r\n", parsingBuff);
+				if (strncmp((const char*) parsingBuff, (const char*) "GPS", 3) == 0) {
+					Flush_Buffer(parsingBuff, 13);
+					//					recibidoReady = 1;
+					PRINTF("Recibido Parsing\r\n");
+				}
+			}
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+
+		}
+//		else if (recibidoReady == 1) {
 //			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
 //			if (HAL_SPI_Receive(&hspi2, (uint8_t *) aRxBuffer, BUFFERSIZE, 5) == HAL_OK) {
 //				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
