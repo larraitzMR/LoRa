@@ -205,7 +205,7 @@ static void OnledEvent(void);
 extern SPI_HandleTypeDef hspi2;
 
 /* Buffer used for transmission */
-#define BUFFERSIZE                       30
+#define BUFFERSIZE                       40
 //#define BUFFERSIZE                       (COUNTOF(aTxBuffer) - 1)
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
@@ -213,7 +213,7 @@ extern SPI_HandleTypeDef hspi2;
 uint8_t aTxBuffer[] =" ";
 
 /* Buffer used for reception */
-uint8_t buffLora[BUFFERSIZE];
+uint8_t buffLora[40];
 uint8_t pruebBuff[BUFFERSIZE];
 uint8_t i;
 uint8_t RxReady[5];
@@ -332,13 +332,13 @@ int main(void) {
 		}
 		else if (recibidoReady == 1) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) OKMsg, (uint8_t *) parsingBuff, 13, 3000) == HAL_OK) {
+			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) OKMsg, (uint8_t *) parsingBuff, 40, 3000) == HAL_OK) {
 				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {}
 				PRINTF("%s\r\n", parsingBuff);
 				strcpy(buffLora,parsingBuff);
 				if (strncmp((const char*) parsingBuff, (const char*) "GPS", 3) == 0) {
 //					Flush_Buffer(parsingBuff, 13);
-					PRINTF("Recibido Parsing\r\n");
+//					PRINTF("Recibido Parsing\r\n");
 				}
 			}
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
@@ -367,7 +367,7 @@ int main(void) {
 										LED_Toggle(LED_RED2);
 
 										DelayMs(1);
-										strcpy(pruebBuff, "LAR");
+//										strcpy(pruebBuff, "LAR");
 //										Radio.Send(pruebBuff, BUFFERSIZE);
 										Radio.Send(buffLora, BUFFERSIZE);
 										Radio.Rx( RX_TIMEOUT_VALUE);
@@ -377,7 +377,7 @@ int main(void) {
 									}
 									if ((recibidoMaster == 1)&& (strncmp((const char*) Buffer,(const char*) OKMsg, 2) == 0)) {
 										DelayMs(1);
-										strcpy(pruebBuff, "LAR");
+//										strcpy(pruebBuff, "LAR");
 //										Radio.Send(pruebBuff, BUFFERSIZE);
 										Radio.Send(buffLora, BUFFERSIZE);
 										Radio.Rx( RX_TIMEOUT_VALUE);
@@ -388,7 +388,7 @@ int main(void) {
 								}
 						} else {
 							if (BufferSize > 0) {
-								PRINTF("Slave: %s\r\n", Buffer);
+								PRINTF("%s\r\n", Buffer);
 								if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) {
 									// Indicates on a LED that the received frame is a PING
 									TimerStop(&timerLed);
