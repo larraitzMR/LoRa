@@ -13,6 +13,7 @@
 #include "lora.h"
 #include "version.h"
 #include "gps.h"
+#include "display.h"
 
 /** Lora **/
 /*!
@@ -214,7 +215,6 @@ uint8_t aTxBuffer[] =" ";
 
 /* Buffer used for reception */
 uint8_t buffLora[40];
-uint8_t i;
 uint8_t RxReady[5];
 uint8_t parsingBuff[BUFFERSIZE];
 
@@ -228,13 +228,14 @@ int enviadoReady = 0;
 int errorReady = 0;
 int transmite = 0;
 int estado = 0;
+int i = 0;
 
 
 struct datosMicro {
-	char datos[200];
+	char datos[100];
 };
 
-struct datosMicro misDat[50];
+struct datosMicro misDat[150];
 int dat = 0;
 
 int main(void) {
@@ -247,6 +248,10 @@ int main(void) {
 
 	DBG_Init();
 	HW_Init();
+
+	LCD_Config();
+	LCD_Init();
+	LCD_Command(LCD_CLEAR_DISPLAY);
 
 	SPI_Config();
 	SPI_Init();
@@ -290,37 +295,43 @@ int main(void) {
 	Radio.Rx( RX_TIMEOUT_VALUE);
 
 	/* Master */
-	bool isMaster = true;
+//	bool isMaster = true;
 	/* Slave */
-//	bool isMaster = false;
+	bool isMaster = false;
+
 	while (1) {
-		if (recibidoReady == 0) {
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) ReadyMsg, (uint8_t *) RxReady, 5, 3000) == HAL_OK) {
-				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
-				}
-				PRINTF("%s\r\n", RxReady);
-				if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5)
-						== 0) {
-//					Flush_Buffer(RxReady, 5);
-					recibidoReady = 1;
-					PRINTF("Recibido Ready\r\n");
-				}
-			}
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-		} else if (recibidoReady == 1) {
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) OKMsg, (uint8_t *) parsingBuff, 40, 3000) == HAL_OK) {
-				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
-				}
-				PRINTF("%s\r\n", parsingBuff);
-				strcpy(buffLora, parsingBuff);
-				if (strncmp((const char*) parsingBuff, (const char*) "GPS", 3)
-						== 0) {
-				}
-			}
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-		}
+//		if (recibidoReady == 0) {
+//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+//			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) ReadyMsg, (uint8_t *) RxReady, 5, 3000) == HAL_OK) {
+//				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
+//				}
+//				PRINTF("%s\r\n", RxReady);
+//				if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5) == 0) {
+////					Flush_Buffer(RxReady, 5);
+//					recibidoReady = 1;
+//					PRINTF("Recibido Ready\r\n");
+//				}
+//			}
+//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+//		} else if (recibidoReady == 1) {
+//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+//			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) OKMsg, (uint8_t *) parsingBuff, 40, 3000) == HAL_OK) {
+//				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
+//				}
+//				PRINTF("%s\r\n", parsingBuff);
+//				strcpy(misDat[i].datos, parsingBuff);
+//
+//				if (strncmp((const char*) parsingBuff, (const char*) "GPS", 3)	== 0) {
+//					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+//					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+//					if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) parsingBuff,(uint8_t *) OKMsg, 40, 3000) == HAL_OK) {
+//						while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
+//						}
+//					}
+//				}
+//			}
+//			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+//		}
 		switch (State) {
 		case RX:
 			if (isMaster == true) {
@@ -336,7 +347,7 @@ int main(void) {
 						LED_Toggle(LED_RED2);
 
 						DelayMs(1);
-						Radio.Send(buffLora, BUFFERSIZE);
+						Radio.Send(misDat[i].datos, BUFFERSIZE);
 						Radio.Rx( RX_TIMEOUT_VALUE);
 						recibidoMaster = 1;
 						errorReady = 1;
@@ -345,7 +356,7 @@ int main(void) {
 							&& (strncmp((const char*) Buffer,
 									(const char*) OKMsg, 2) == 0)) {
 						DelayMs(1);
-						Radio.Send(buffLora, BUFFERSIZE);
+						Radio.Send(misDat[i].datos, BUFFERSIZE);
 						Radio.Rx( RX_TIMEOUT_VALUE);
 						PRINTF("Enviando LAR\r\n");
 					}
@@ -368,11 +379,14 @@ int main(void) {
 						recibidoSlave = 1;
 						PRINTF("PrimerComandoEnviadoSlave\r\n");
 						Radio.Rx( RX_TIMEOUT_VALUE);
+						LCD_Print(Buffer);
 					}
 					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "PING", 8) == 0)) {
 						Radio.Send(OKMsg, 2);
 						PRINTF("OK\r\n");
 						Radio.Rx( RX_TIMEOUT_VALUE);
+						LCD_Print(Buffer);
+
 					}
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
@@ -392,7 +406,7 @@ int main(void) {
 					PRINTF("Master Ready\r\n");
 				}
 				if (errorReady == 1) {
-					Radio.Send(buffLora, BUFFERSIZE);
+					Radio.Send(misDat[i].datos, BUFFERSIZE);
 				}
 				// Send the next PING frame
 				DelayMs(1);
@@ -409,6 +423,10 @@ int main(void) {
 		default:
 			// Set low power
 			break;
+		}
+		i++;
+		if (i == 149){
+			i = 0;
 		}
 
 		DISABLE_IRQ( );
