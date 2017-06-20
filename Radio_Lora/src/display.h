@@ -9,25 +9,31 @@
 
 // Control signal data pins
 
-#define RS 	GPIO_PIN_8 	// LCD RS signal
-#define E 	GPIO_PIN_9 // LCD E signal
+#define RS 	GPIO_PIN_0 	// LCD RS signal
+//#define RW 	GPIO_PIN_7 	// LCD R/W signal
+#define E 	GPIO_PIN_1 // LCD E signal
 
-#define Control_Port	GPIOB
+#define Control_Port	GPIOH
 #define Control_Reg		ODR
 
-#define DB0 GPIO_PIN_5
-#define DB1 GPIO_PIN_7
-#define DB2 GPIO_PIN_2
-#define DB3 GPIO_PIN_12
-#define DB4 GPIO_PIN_6
-#define DB5 GPIO_PIN_15
-#define DB6 GPIO_PIN_14
-#define DB7 GPIO_PIN_13
+#define DB0 GPIO_PIN_12
+#define DB1 GPIO_PIN_2
 
-#define LCD_PORT GPIOB
+#define DB2 GPIO_PIN_10
+#define DB3 GPIO_PIN_8
+#define DB4 GPIO_PIN_11
+#define DB5 GPIO_PIN_12
+#define DB6 GPIO_PIN_9
+#define DB7 GPIO_PIN_0
 
+#define LCD_PORT GPIOA
+
+#define GPIOA_CLK_ENABLE()		__HAL_RCC_GPIOA_CLK_ENABLE()
+#define GPIOA_CLK_DISABLE()		__HAL_RCC_GPIOA_CLK_DISABLE()
 #define GPIOB_CLK_ENABLE()		__HAL_RCC_GPIOB_CLK_ENABLE()
 #define GPIOB_CLK_DISABLE()		__HAL_RCC_GPIOB_CLK_DISABLE()
+#define GPIOH_CLK_ENABLE()		__HAL_RCC_GPIOH_CLK_ENABLE()
+#define GPIOH_CLK_DISABLE()		__HAL_RCC_GPIOH_CLK_DISABLE()
 
 // Clear Display -------------- 0b00000001
 #define LCD_CLEAR_DISPLAY       0x01

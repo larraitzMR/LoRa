@@ -16,18 +16,28 @@ void LCD_Config(void) {
 
 	GPIO_InitTypeDef GPIO_InitStruct;
 
-	__GPIOB_CLK_ENABLE();
-//	GPIO_InitStruct.Pin = RS | E; // pin que desamos configurar
-//	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; // lo vamos a usar como salida en push - pull
-//	GPIO_InitStruct.Pull = GPIO_NOPULL;
-//	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-//	HAL_GPIO_Init(Control_Port, &GPIO_InitStruct);
-
-	GPIO_InitStruct.Pin = RS | E | DB7 | DB6 | DB5 | DB4 | DB3 | DB2 | DB1 | DB0; // pin que desamos configurar
+	__HAL_RCC_GPIOH_CLK_ENABLE();
+	GPIO_InitStruct.Pin = RS | E; // pin que desamos configurar
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; // lo vamos a usar como salida en push - pull
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
-	HAL_GPIO_Init(LCD_PORT, &GPIO_InitStruct);
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(Control_Port, &GPIO_InitStruct);
+
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	GPIO_InitStruct.Pin = DB7 | DB6 | DB5 | DB4 | DB3 | DB2; // pin que desamos configurar
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; // lo vamos a usar como salida en push - pull
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	GPIO_InitStruct.Pin =  DB1 | DB0; // pin que desamos configurar
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; // lo vamos a usar como salida en push - pull
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+
 
 }
 
@@ -87,13 +97,13 @@ void LCD_Output(uint8_t data) {
 	else
 		HAL_GPIO_WritePin(LCD_PORT, DB2, GPIO_PIN_RESET);
 	if (data & 0x02)
-		HAL_GPIO_WritePin(LCD_PORT, DB1, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOB, DB1, GPIO_PIN_SET);
 	else
-		HAL_GPIO_WritePin(LCD_PORT, DB1, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOB, DB1, GPIO_PIN_RESET);
 	if (data & 0x01)
-		HAL_GPIO_WritePin(LCD_PORT, DB0, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOB, DB0, GPIO_PIN_SET);
 	else
-		HAL_GPIO_WritePin(LCD_PORT, DB0, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOB, DB0, GPIO_PIN_RESET);
 	LCD_Enable();
 }
 

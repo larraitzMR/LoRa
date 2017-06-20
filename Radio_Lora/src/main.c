@@ -147,13 +147,6 @@ typedef enum {
                    LED_Off( LED_GREEN2 ) ; \
                    } while(0) ;
 
-const uint8_t PingMsg[] = "PING";
-const uint8_t PongMsg[] = "PONG";
-uint8_t ReadyMsg[] = "READY";
-uint8_t OKMsg[2] = "OK";
-
-uint16_t BufferSize = BUFFER_SIZE;
-uint8_t Buffer[BUFFER_SIZE];
 
 States_t State = LOWPOWER;
 
@@ -206,7 +199,7 @@ static void OnledEvent(void);
 extern SPI_HandleTypeDef hspi2;
 
 /* Buffer used for transmission */
-#define BUFFERSIZE                       40
+#define BUFFERSIZE                       39
 //#define BUFFERSIZE                       (COUNTOF(aTxBuffer) - 1)
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
@@ -217,6 +210,15 @@ uint8_t aTxBuffer[] =" ";
 uint8_t buffLora[40];
 uint8_t RxReady[5];
 uint8_t parsingBuff[BUFFERSIZE];
+
+const uint8_t PingMsg[] = "PING";
+const uint8_t PongMsg[] = "PONG";
+uint8_t ReadyMsg[] = "READY";
+uint8_t OKMsg[2] = "OK";
+
+uint16_t BufferSize = BUFFER_SIZE;
+uint8_t Buffer[BUFFER_SIZE];
+
 
 extern UART_HandleTypeDef huart1;
 //__IO ITStatus UartReady = RESET;
@@ -229,6 +231,13 @@ int errorReady = 0;
 int transmite = 0;
 int estado = 0;
 int i = 0;
+
+char hora[8];
+char lat[10];
+char latC[1];
+char lon[10];
+char lonC[1];
+char buffGPS[40];
 
 
 struct datosMicro {
@@ -298,6 +307,9 @@ int main(void) {
 //	bool isMaster = true;
 	/* Slave */
 	bool isMaster = false;
+//	LCD_Cursor(1);
+//	LCD_Print_String("abcdefghijklmnopqrstuvwyz");
+//	LCD_Print_String("0123456789");
 
 	while (1) {
 //		if (recibidoReady == 0) {
@@ -336,7 +348,7 @@ int main(void) {
 		case RX:
 			if (isMaster == true) {
 				if (BufferSize > 0) {
-					PRINTF(" Master: %s\r\n", Buffer);
+//					PRINTF(" Master: %s\r\n", Buffer);
 					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) {
 						enviadoReady = 1;
 						TimerStop(&timerLed);
@@ -358,7 +370,7 @@ int main(void) {
 						DelayMs(1);
 						Radio.Send(misDat[i].datos, BUFFERSIZE);
 						Radio.Rx( RX_TIMEOUT_VALUE);
-						PRINTF("Enviando LAR\r\n");
+//						PRINTF("Enviando LAR\r\n");
 					}
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
@@ -366,9 +378,15 @@ int main(void) {
 			} else {
 				if (BufferSize > 0) {
 					PRINTF("%s\r\n", Buffer);
+//					LCD_Cursor(1);
+//					LCD_Print_String("abcdefghijklmnopqrstuvwyz");
+//					LCD_Print_String("0123456789");
+//					strcpy(buffGPS, Buffer);
+//					LCD_Print(buffGPS);
 					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5)
 							== 0) {
 						// Indicates on a LED that the received frame is a PING
+						LCD_Command(LCD_CLEAR_DISPLAY);
 						TimerStop(&timerLed);
 						LED_Off(LED_RED1);
 						LED_Off(LED_RED2);
@@ -377,15 +395,32 @@ int main(void) {
 						Radio.Send(ReadyMsg, 5);
 						PRINTF("Slave Ready\r\n");
 						recibidoSlave = 1;
-						PRINTF("PrimerComandoEnviadoSlave\r\n");
 						Radio.Rx( RX_TIMEOUT_VALUE);
-						LCD_Print(Buffer);
+						LCD_Cursor(1);
+						strcpy(buffGPS, Buffer);
+						LCD_Print_String(buffGPS);
 					}
-					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "PING", 8) == 0)) {
+					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "\nGPS", 4) == 0)) {
+						LCD_Command(LCD_CLEAR_DISPLAY);
 						Radio.Send(OKMsg, 2);
-						PRINTF("OK\r\n");
+						memcpy(hora, &Buffer[5], 8 );
+						memcpy(lat, &Buffer[14], 10 );
+						memcpy(latC, &Buffer[25], 1 );
+						memcpy(lon, &Buffer[27], 10 );
+						memcpy(lonC, &Buffer[38], 1 );
+						LCD_Cursor(1);
+						LCD_Print_String(hora);
+						LCD_Cursor(2);
+						LCD_Print_String(lat);
+						LCD_Print_String(latC);
+						LCD_Cursor(3);
+						LCD_Print_String(lon);
+						LCD_Print_String(lonC);
+						//						PRINTF("OK\r\n");
 						Radio.Rx( RX_TIMEOUT_VALUE);
-						LCD_Print(Buffer);
+						//						strcpy(buffGPS, Buffer);
+						//						memcpy(hora, &Buffer[5], 8 );
+						//						LCD_Print(buffGPS);
 
 					}
 					Radio.Rx( RX_TIMEOUT_VALUE);
