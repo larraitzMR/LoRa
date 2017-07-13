@@ -476,12 +476,13 @@ int main(void) {
 	}
 }
 
+//La llamada  PRINTF("txDone\n\r"); esta en sx1276.c, funcion SX1276OnDio0Irq
 void OnTxDone(void) {
 	Radio.Sleep();
 	State = TX;
-//	PRINTF("OnTxDone\n");
 }
 
+//La llamada PRINTF("rxDone\n\r"); esta en sx1276.c, funcion SX1276OnDio0Irq
 void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
 	Radio.Sleep();
 	BufferSize = size;
@@ -489,9 +490,6 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
 	RssiValue = rssi;
 	SnrValue = snr;
 	State = RX;
-
-//	PRINTF("OnRxDone\n");
-//	PRINTF("RssiValue=%d dBm, SnrValue=%d\n", rssi, snr);
 }
 
 void OnTxTimeout(void) {

@@ -1581,7 +1581,7 @@ void SX1276OnDio0Irq( void )
                     if( ( RadioEvents != NULL ) && ( RadioEvents->RxDone != NULL ) )
                     {
                         RadioEvents->RxDone( RxTxBuffer, SX1276.Settings.LoRaPacketHandler.Size, SX1276.Settings.LoRaPacketHandler.RssiValue, SX1276.Settings.LoRaPacketHandler.SnrValue );
-                        PRINTF("rxDone\n\r");
+//                        PRINTF("rxDone\n\r");
                     }
                 }
                 break;
@@ -1604,7 +1604,7 @@ void SX1276OnDio0Irq( void )
                 if( ( RadioEvents != NULL ) && ( RadioEvents->TxDone != NULL ) )
                 {
                     RadioEvents->TxDone( );
-                   PRINTF("txDone\n\r");
+//                   PRINTF("txDone\n\r");
                 }
                 break;
             }
