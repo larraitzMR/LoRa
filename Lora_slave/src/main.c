@@ -214,7 +214,7 @@ uint8_t parsingBuff[BUFFERSIZE];
 const uint8_t PingMsg[] = "PING";
 const uint8_t PongMsg[] = "PONG";
 uint8_t ReadyMsg[] = "READY";
-uint8_t OKMsg[2] = "OK";
+uint8_t OKMsg[] = "OK";
 
 uint16_t BufferSize = BUFFER_SIZE;
 uint8_t Buffer[BUFFER_SIZE];
@@ -248,7 +248,7 @@ char lon[10];
 char lonC[1];
 char buffGPS[40];
 char ReadyID[6];
-char OKID[3];
+char OK_ID[3];
 
 
 struct datosMicro {
@@ -330,7 +330,8 @@ int main(void) {
 		case RX:
 			if (isMaster == true) {
 				if (BufferSize > 0) {
-					if ((strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) && Buffer[5] == IDLora) {
+//
+					if ((strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) && Buffer[5] == IDSlaveLora[0]) {
 						enviadoReady = 1;
 						TimerStop(&timerLed);
 						LED_Off(LED_BLUE);
@@ -338,6 +339,8 @@ int main(void) {
 						LED_Off(LED_RED1);
 						// Indicates on a LED that the received frame is a PONG
 						LED_Toggle(LED_RED2);
+						PRINTF(" Master: %s\r\n", Buffer);
+						PRINTF("%s\r\n", IDSlaveLora[0]);
 
 						DelayMs(1);
 						Radio.Send(misDat[i].datos, BUFFERSIZE);
@@ -345,17 +348,22 @@ int main(void) {
 						recibidoMaster = 1;
 						errorReady = 1;
 					}
-					if ((recibidoMaster == 1) && (strncmp((const char*) Buffer, (const char*) OKMsg, 2) == 0)) {
+					if ((recibidoMaster == 1) && (strncmp((const char*) Buffer,(const char*) OKMsg, 2) == 0) && Buffer[2] == IDSlaveLora[0]) {
 						DelayMs(1);
 						Radio.Send(misDat[i].datos, BUFFERSIZE);
 						Radio.Rx( RX_TIMEOUT_VALUE);
+						isMaster = false;
+//						PRINTF("Enviando LAR\r\n");
+//						recibidoSlave = 0;
+						PRINTF(" Master: %s\r\n", Buffer);
+//						PRINTF("%s\r\n", IDSlaveLora[0]);
 					}
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
 				}
 			} else {
 				if (BufferSize > 0) {
-					PRINTF("%s\r\n", Buffer);
+//					PRINTF(" Slave: %s\r\n", Buffer);
 					if ((strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) && Buffer[5] == IDMasterLora[0]) {
 						// Indicates on a LED that the received frame is a PING
 						LCD_Command(LCD_CLEAR_DISPLAY);
@@ -365,9 +373,9 @@ int main(void) {
 						LED_Off(LED_GREEN);
 						LED_Toggle(LED_BLUE);
 						sprintf(ReadyID, "%s%d", ReadyMsg, ID);
-						PRINTF(ReadyID);
+//						PRINTF(ReadyID);
 						Radio.Send(ReadyID, 6);
-						PRINTF("Slave Ready\r\n");
+//						PRINTF("\r\nSlave Ready\r\n");
 						recibidoSlave = 1;
 						Radio.Rx( RX_TIMEOUT_VALUE);
 						LCD_Cursor(1);
@@ -375,9 +383,11 @@ int main(void) {
 						LCD_Print_String(buffGPS);
 					}
 					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "\nGPS", 4) == 0)) {
+						PRINTF("Soy Esclavo\r\n");
+						PRINTF("%s\r\n", Buffer);
 						LCD_Command(LCD_CLEAR_DISPLAY);
-						sprintf(OKID, "%s%d", OKMsg, ID);
-						Radio.Send(OKID, 2);
+						sprintf(OK_ID, "%s%d", OKMsg, ID);
+						Radio.Send(OK_ID, 3);
 						memcpy(hora, &Buffer[5], 8 );
 						memcpy(lat, &Buffer[14], 10 );
 						memcpy(latC, &Buffer[25], 1 );
@@ -392,7 +402,7 @@ int main(void) {
 						LCD_Print_String(lon);
 						LCD_Print_String(lonC);
 						Radio.Rx( RX_TIMEOUT_VALUE);
-//						isMaster = true;
+						isMaster = true;
 					}
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
@@ -410,7 +420,7 @@ int main(void) {
 				if (enviadoReady == 0) {
 					sprintf(ReadyID, "%s%d", ReadyMsg, ID);
 					Radio.Send(ReadyID, 6);
-					PRINTF("Master Ready\r\n");
+//					PRINTF("Master Ready\r\n");
 				}
 				if (errorReady == 1) {
 					Radio.Send(misDat[i].datos, BUFFERSIZE);

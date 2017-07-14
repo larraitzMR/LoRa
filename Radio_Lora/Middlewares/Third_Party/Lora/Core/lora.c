@@ -571,10 +571,10 @@ void lora_Init (LoRaMainCallback_t *callbacks, LoRaParam_t* LoRaParam )
   
 #if( OVER_THE_AIR_ACTIVATION != 0 )
 
-  PRINTF("OTAA\n\r"); 
-  PRINTF("DevEui= %02X", DevEui[0]) ;for(int i=1; i<8 ; i++) {PRINTF("-%02X", DevEui[i]); }; PRINTF("\n\r");
-  PRINTF("AppEui= %02X", AppEui[0]) ;for(int i=1; i<8 ; i++) {PRINTF("-%02X", AppEui[i]); }; PRINTF("\n\r");
-  PRINTF("AppKey= %02X", AppKey[0]) ;for(int i=1; i<16; i++) {PRINTF(" %02X", AppKey[i]); }; PRINTF("\n\n\r");
+//  PRINTF("OTAA\n\r");
+//  PRINTF("DevEui= %02X", DevEui[0]) ;for(int i=1; i<8 ; i++) {PRINTF("-%02X", DevEui[i]); }; PRINTF("\n\r");
+//  PRINTF("AppEui= %02X", AppEui[0]) ;for(int i=1; i<8 ; i++) {PRINTF("-%02X", AppEui[i]); }; PRINTF("\n\r");
+//  PRINTF("AppKey= %02X", AppKey[0]) ;for(int i=1; i<16; i++) {PRINTF(" %02X", AppKey[i]); }; PRINTF("\n\n\r");
 #else
 
 #if (STATIC_DEVICE_ADDRESS != 1)
