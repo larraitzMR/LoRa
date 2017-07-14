@@ -231,7 +231,15 @@ int errorReady = 0;
 int transmite = 0;
 int estado = 0;
 int i = 0;
+
+int IDMaster;
+char IDMasterLora[1];
+
 int ID;
+char IDLora[1];
+
+int IDSlave;
+char IDSlaveLora[1];
 
 char hora[8];
 char lat[10];
@@ -239,6 +247,8 @@ char latC[1];
 char lon[10];
 char lonC[1];
 char buffGPS[40];
+char ReadyID[6];
+char OKID[3];
 
 
 struct datosMicro {
@@ -308,15 +318,19 @@ int main(void) {
 //	bool isMaster = true;
 	/* Slave */
 	bool isMaster = false;
-
 	ID = 1;
+	sprintf(IDLora,"%d", ID);
+	IDMaster = ID-1;
+	sprintf(IDMasterLora,"%d", IDMaster);
+	IDSlave = ID+1;
+	sprintf(IDSlaveLora,"%d", IDSlave);
 
 	while (1) {
 		switch (State) {
 		case RX:
 			if (isMaster == true) {
 				if (BufferSize > 0) {
-					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) {
+					if ((strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) && Buffer[5] == IDLora) {
 						enviadoReady = 1;
 						TimerStop(&timerLed);
 						LED_Off(LED_BLUE);
@@ -331,9 +345,7 @@ int main(void) {
 						recibidoMaster = 1;
 						errorReady = 1;
 					}
-					if ((recibidoMaster == 1)
-							&& (strncmp((const char*) Buffer,
-									(const char*) OKMsg, 2) == 0)) {
+					if ((recibidoMaster == 1) && (strncmp((const char*) Buffer, (const char*) OKMsg, 2) == 0)) {
 						DelayMs(1);
 						Radio.Send(misDat[i].datos, BUFFERSIZE);
 						Radio.Rx( RX_TIMEOUT_VALUE);
@@ -344,8 +356,7 @@ int main(void) {
 			} else {
 				if (BufferSize > 0) {
 					PRINTF("%s\r\n", Buffer);
-					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5)
-							== 0) {
+					if ((strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) && Buffer[5] == IDMasterLora[0]) {
 						// Indicates on a LED that the received frame is a PING
 						LCD_Command(LCD_CLEAR_DISPLAY);
 						TimerStop(&timerLed);
@@ -353,7 +364,9 @@ int main(void) {
 						LED_Off(LED_RED2);
 						LED_Off(LED_GREEN);
 						LED_Toggle(LED_BLUE);
-						Radio.Send(ReadyMsg, 5);
+						sprintf(ReadyID, "%s%d", ReadyMsg, ID);
+						PRINTF(ReadyID);
+						Radio.Send(ReadyID, 6);
 						PRINTF("Slave Ready\r\n");
 						recibidoSlave = 1;
 						Radio.Rx( RX_TIMEOUT_VALUE);
@@ -363,7 +376,8 @@ int main(void) {
 					}
 					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "\nGPS", 4) == 0)) {
 						LCD_Command(LCD_CLEAR_DISPLAY);
-						Radio.Send(OKMsg, 2);
+						sprintf(OKID, "%s%d", OKMsg, ID);
+						Radio.Send(OKID, 2);
 						memcpy(hora, &Buffer[5], 8 );
 						memcpy(lat, &Buffer[14], 10 );
 						memcpy(latC, &Buffer[25], 1 );
@@ -378,6 +392,7 @@ int main(void) {
 						LCD_Print_String(lon);
 						LCD_Print_String(lonC);
 						Radio.Rx( RX_TIMEOUT_VALUE);
+//						isMaster = true;
 					}
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
@@ -393,7 +408,8 @@ int main(void) {
 		case RX_ERROR:
 			if (isMaster == true) {
 				if (enviadoReady == 0) {
-					Radio.Send(ReadyMsg, 5);
+					sprintf(ReadyID, "%s%d", ReadyMsg, ID);
+					Radio.Send(ReadyID, 6);
 					PRINTF("Master Ready\r\n");
 				}
 				if (errorReady == 1) {
