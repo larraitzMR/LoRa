@@ -234,10 +234,8 @@ int i = 0;
 
 int IDMaster;
 char IDMasterLora[1];
-
-int ID;
+int miID;
 char IDLora[1];
-
 int IDSlave;
 char IDSlaveLora[1];
 
@@ -249,6 +247,8 @@ char lonC[1];
 char buffGPS[40];
 char ReadyID[6];
 char OK_ID[3];
+char IDDatos[];
+char GPS[];
 
 
 struct datosMicro {
@@ -318,11 +318,11 @@ int main(void) {
 //	bool isMaster = true;
 	/* Slave */
 	bool isMaster = false;
-	ID = 1;
-	sprintf(IDLora,"%d", ID);
-	IDMaster = ID-1;
+	miID = 1;
+	sprintf(IDLora,"%d", miID);
+	IDMaster = miID-1;
 	sprintf(IDMasterLora,"%d", IDMaster);
-	IDSlave = ID+1;
+	IDSlave = miID+1;
 	sprintf(IDSlaveLora,"%d", IDSlave);
 
 	while (1) {
@@ -330,8 +330,9 @@ int main(void) {
 		case RX:
 			if (isMaster == true) {
 				if (BufferSize > 0) {
-//
+//					PRINTF(" Master: %s\r\n", Buffer);
 					if ((strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) && Buffer[5] == IDSlaveLora[0]) {
+						PRINTF("Master: %s\r\n", Buffer);
 						enviadoReady = 1;
 						TimerStop(&timerLed);
 						LED_Off(LED_BLUE);
@@ -339,31 +340,28 @@ int main(void) {
 						LED_Off(LED_RED1);
 						// Indicates on a LED that the received frame is a PONG
 						LED_Toggle(LED_RED2);
-						PRINTF(" Master: %s\r\n", Buffer);
-						PRINTF("%s\r\n", IDSlaveLora[0]);
 
 						DelayMs(1);
-						Radio.Send(misDat[i].datos, BUFFERSIZE);
+						sprintf(IDDatos, "%d%s", miID,misDat[i].datos);
+						Radio.Send(IDDatos, strlen(IDDatos));
 						Radio.Rx( RX_TIMEOUT_VALUE);
 						recibidoMaster = 1;
 						errorReady = 1;
 					}
 					if ((recibidoMaster == 1) && (strncmp((const char*) Buffer,(const char*) OKMsg, 2) == 0) && Buffer[2] == IDSlaveLora[0]) {
+						PRINTF("Master: %s\r\n", Buffer);
 						DelayMs(1);
-						Radio.Send(misDat[i].datos, BUFFERSIZE);
+						sprintf(IDDatos, "%d%s", miID,misDat[i].datos);
+						Radio.Send(IDDatos, strlen(IDDatos));
 						Radio.Rx( RX_TIMEOUT_VALUE);
-						isMaster = false;
 //						PRINTF("Enviando LAR\r\n");
-//						recibidoSlave = 0;
-						PRINTF(" Master: %s\r\n", Buffer);
-//						PRINTF("%s\r\n", IDSlaveLora[0]);
 					}
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
 				}
 			} else {
 				if (BufferSize > 0) {
-//					PRINTF(" Slave: %s\r\n", Buffer);
+					PRINTF(" Slave: %s\r\n", Buffer);
 					if ((strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) && Buffer[5] == IDMasterLora[0]) {
 						// Indicates on a LED that the received frame is a PING
 						LCD_Command(LCD_CLEAR_DISPLAY);
@@ -372,7 +370,7 @@ int main(void) {
 						LED_Off(LED_RED2);
 						LED_Off(LED_GREEN);
 						LED_Toggle(LED_BLUE);
-						sprintf(ReadyID, "%s%d", ReadyMsg, ID);
+						sprintf(ReadyID, "%s%d", ReadyMsg, miID);
 //						PRINTF(ReadyID);
 						Radio.Send(ReadyID, 6);
 //						PRINTF("\r\nSlave Ready\r\n");
@@ -382,11 +380,13 @@ int main(void) {
 						strcpy(buffGPS, Buffer);
 						LCD_Print_String(buffGPS);
 					}
-					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "\nGPS", 4) == 0)) {
+					strncpy(GPS, Buffer, 4);
+//					PRINTF(GPS);
+					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) GPS, 4) == 0) && Buffer[0] == IDMasterLora[0] ) {
 						PRINTF("Soy Esclavo\r\n");
 						PRINTF("%s\r\n", Buffer);
 						LCD_Command(LCD_CLEAR_DISPLAY);
-						sprintf(OK_ID, "%s%d", OKMsg, ID);
+						sprintf(OK_ID, "%s%d", OKMsg, miID);
 						Radio.Send(OK_ID, 3);
 						memcpy(hora, &Buffer[5], 8 );
 						memcpy(lat, &Buffer[14], 10 );
@@ -402,8 +402,9 @@ int main(void) {
 						LCD_Print_String(lon);
 						LCD_Print_String(lonC);
 						Radio.Rx( RX_TIMEOUT_VALUE);
-						isMaster = true;
+//						isMaster = true;
 					}
+					memset(GPS, '\0', 4);
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
 				}
@@ -418,7 +419,7 @@ int main(void) {
 		case RX_ERROR:
 			if (isMaster == true) {
 				if (enviadoReady == 0) {
-					sprintf(ReadyID, "%s%d", ReadyMsg, ID);
+					sprintf(ReadyID, "%s%d", ReadyMsg, miID);
 					Radio.Send(ReadyID, 6);
 //					PRINTF("Master Ready\r\n");
 				}
@@ -429,6 +430,10 @@ int main(void) {
 				DelayMs(1);
 				Radio.Rx( RX_TIMEOUT_VALUE);
 			} else {
+				if(recibidoSlave == 0){
+					sprintf(ReadyID, "%s%d", ReadyMsg, miID);
+					Radio.Send(ReadyID, 6);
+				}
 				Radio.Rx( RX_TIMEOUT_VALUE);
 			}
 			State = LOWPOWER;
