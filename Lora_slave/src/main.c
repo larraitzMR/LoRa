@@ -401,7 +401,7 @@ int main(void) {
 						LCD_Print_String(lon);
 						LCD_Print_String(lonC);
 						Radio.Rx( RX_TIMEOUT_VALUE);
-						isMaster = true;
+//						isMaster = true;
 					}
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
