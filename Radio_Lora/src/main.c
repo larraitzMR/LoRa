@@ -209,12 +209,13 @@ uint8_t aTxBuffer[] =" ";
 /* Buffer used for reception */
 uint8_t buffLora[40];
 uint8_t RxReady[5];
-uint8_t parsingBuff[BUFFERSIZE];
+uint8_t parsingBuff[];
+uint8_t BuffDatos[];
 
 const uint8_t PingMsg[] = "PING";
 const uint8_t PongMsg[] = "PONG";
 uint8_t ReadyMsg[] = "READY";
-uint8_t OKMsg[2] = "OK";
+uint8_t OKMsg[] = "OK";
 
 uint16_t BufferSize = BUFFER_SIZE;
 uint8_t Buffer[BUFFER_SIZE];
@@ -240,8 +241,9 @@ char lonC[1];
 char buffGPS[40];
 char* a;
 char ReadyID[6];
+char IDDatos[];
 
-int ID;
+int miID;
 char IDLora[1];
 
 int IDSlave;
@@ -317,9 +319,9 @@ int main(void) {
 	/* Slave */
 //	bool isMaster = false;
 
-	ID = 0;
-	sprintf(IDLora,"%d", ID);
-	IDSlave = ID+1;
+	miID = 0;
+	sprintf(IDLora,"%d", miID);
+	IDSlave = miID+1;
 	sprintf(IDSlaveLora,"%d", IDSlave);
 
 	while (1) {
@@ -341,8 +343,9 @@ int main(void) {
 			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) OKMsg, (uint8_t *) parsingBuff, 40, 3000) == HAL_OK) {
 				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
 				}
+				strncpy(BuffDatos, parsingBuff + 1, 39);
 //				PRINTF("%s\r\n", parsingBuff);
-				strcpy(misDat[i].datos, parsingBuff);
+				strcpy(misDat[i].datos, BuffDatos);
 
 				if (strncmp((const char*) parsingBuff, (const char*) "GPS", 3)	== 0) {
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
@@ -361,8 +364,9 @@ int main(void) {
 		case RX:
 			if (isMaster == true) {
 				if (BufferSize > 0) {
-					PRINTF(" Master: %s\r\n", Buffer);
+//					PRINTF(" Master: %s\r\n", Buffer);
 					if ((strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) && Buffer[5] == IDSlaveLora[0]) {
+						PRINTF("Master: %s\r\n", Buffer);
 						enviadoReady = 1;
 						TimerStop(&timerLed);
 						LED_Off(LED_BLUE);
@@ -372,14 +376,17 @@ int main(void) {
 						LED_Toggle(LED_RED2);
 
 						DelayMs(1);
-						Radio.Send(misDat[i].datos, BUFFERSIZE);
+						sprintf(IDDatos, "%d%s", miID,misDat[i].datos);
+						Radio.Send(IDDatos, strlen(IDDatos));
 						Radio.Rx( RX_TIMEOUT_VALUE);
 						recibidoMaster = 1;
 						errorReady = 1;
 					}
 					if ((recibidoMaster == 1) && (strncmp((const char*) Buffer,(const char*) OKMsg, 2) == 0) && Buffer[2] == IDSlaveLora[0]) {
+						PRINTF("Master: %s\r\n", Buffer);
 						DelayMs(1);
-						Radio.Send(misDat[i].datos, BUFFERSIZE);
+						sprintf(IDDatos, "%d%s", miID,misDat[i].datos);
+						Radio.Send(IDDatos, strlen(IDDatos));
 						Radio.Rx( RX_TIMEOUT_VALUE);
 //						PRINTF("Enviando LAR\r\n");
 					}
@@ -387,49 +394,6 @@ int main(void) {
 					memset(Buffer, '\0', BUFFER_SIZE);
 				}
 			}
-//			else {
-//				if (BufferSize > 0) {
-//					PRINTF("%s\r\n", Buffer);
-//					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 6)
-//							== 0) {
-//						// Indicates on a LED that the received frame is a PING
-//						LCD_Command(LCD_CLEAR_DISPLAY);
-//						TimerStop(&timerLed);
-//						LED_Off(LED_RED1);
-//						LED_Off(LED_RED2);
-//						LED_Off(LED_GREEN);
-//						LED_Toggle(LED_BLUE);
-//						Radio.Send(ReadyMsg, 5);
-//						PRINTF("Slave Ready\r\n");
-//						recibidoSlave = 1;
-//						Radio.Rx( RX_TIMEOUT_VALUE);
-//						LCD_Cursor(1);
-//						strcpy(buffGPS, Buffer);
-//						LCD_Print_String(buffGPS);
-//					}
-//					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "\nGPS", 4) == 0)) {
-//						LCD_Command(LCD_CLEAR_DISPLAY);
-//						Radio.Send(OKMsg, 2);
-//						memcpy(hora, &Buffer[5], 8 );
-//						memcpy(lat, &Buffer[14], 10 );
-//						memcpy(latC, &Buffer[25], 1 );
-//						memcpy(lon, &Buffer[27], 10 );
-//						memcpy(lonC, &Buffer[38], 1 );
-//						LCD_Cursor(1);
-//						LCD_Print_String(hora);
-//						LCD_Cursor(2);
-//						LCD_Print_String(lat);
-//						LCD_Print_String(latC);
-//						LCD_Cursor(3);
-//						LCD_Print_String(lon);
-//						LCD_Print_String(lonC);
-//						Radio.Rx( RX_TIMEOUT_VALUE);
-//
-//					}
-//					Radio.Rx( RX_TIMEOUT_VALUE);
-//					memset(Buffer, '\0', BUFFER_SIZE);
-//				}
-//			}
 			State = LOWPOWER;
 			break;
 		case TX:
@@ -440,12 +404,12 @@ int main(void) {
 		case RX_ERROR:
 			if (isMaster == true) {
 				if (enviadoReady == 0) {
-					sprintf(ReadyID, "%s%d", ReadyMsg, ID);
+					sprintf(ReadyID, "%s%d", ReadyMsg, miID);
 					Radio.Send(ReadyID, 6);
-					PRINTF("Master Ready\r\n");
 				}
 				if (errorReady == 1) {
-					Radio.Send(misDat[i].datos, BUFFERSIZE);
+					sprintf(IDDatos, "%d%s", miID,misDat[i].datos);
+					Radio.Send(IDDatos, strlen(IDDatos));
 				}
 				// Send the next PING frame
 				DelayMs(1);
