@@ -386,49 +386,6 @@ int main(void) {
 					memset(Buffer, '\0', BUFFER_SIZE);
 				}
 			}
-//			else {
-//				if (BufferSize > 0) {
-//					PRINTF("%s\r\n", Buffer);
-//					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 6)
-//							== 0) {
-//						// Indicates on a LED that the received frame is a PING
-//						LCD_Command(LCD_CLEAR_DISPLAY);
-//						TimerStop(&timerLed);
-//						LED_Off(LED_RED1);
-//						LED_Off(LED_RED2);
-//						LED_Off(LED_GREEN);
-//						LED_Toggle(LED_BLUE);
-//						Radio.Send(ReadyMsg, 5);
-//						PRINTF("Slave Ready\r\n");
-//						recibidoSlave = 1;
-//						Radio.Rx( RX_TIMEOUT_VALUE);
-//						LCD_Cursor(1);
-//						strcpy(buffGPS, Buffer);
-//						LCD_Print_String(buffGPS);
-//					}
-//					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "\nGPS", 4) == 0)) {
-//						LCD_Command(LCD_CLEAR_DISPLAY);
-//						Radio.Send(OKMsg, 2);
-//						memcpy(hora, &Buffer[5], 8 );
-//						memcpy(lat, &Buffer[14], 10 );
-//						memcpy(latC, &Buffer[25], 1 );
-//						memcpy(lon, &Buffer[27], 10 );
-//						memcpy(lonC, &Buffer[38], 1 );
-//						LCD_Cursor(1);
-//						LCD_Print_String(hora);
-//						LCD_Cursor(2);
-//						LCD_Print_String(lat);
-//						LCD_Print_String(latC);
-//						LCD_Cursor(3);
-//						LCD_Print_String(lon);
-//						LCD_Print_String(lonC);
-//						Radio.Rx( RX_TIMEOUT_VALUE);
-//
-//					}
-//					Radio.Rx( RX_TIMEOUT_VALUE);
-//					memset(Buffer, '\0', BUFFER_SIZE);
-//				}
-//			}
 			State = LOWPOWER;
 			break;
 		case TX:
