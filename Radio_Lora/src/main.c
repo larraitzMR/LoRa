@@ -208,14 +208,12 @@ uint8_t aTxBuffer[] =" ";
 /* Buffer used for reception */
 uint8_t buffLora[40];
 uint8_t RxReady[5];
-//uint8_t parsingBuff[BUFFERSIZE];
-uint8_t parsingBuff[];
-uint8_t BuffDatos[];
+uint8_t parsingBuff[BUFFERSIZE];
 
 const uint8_t PingMsg[] = "PING";
 const uint8_t PongMsg[] = "PONG";
 uint8_t ReadyMsg[] = "READY";
-uint8_t OKMsg[] = "OK";
+uint8_t OKMsg[2] = "OK";
 
 uint16_t BufferSize = BUFFER_SIZE;
 uint8_t Buffer[BUFFER_SIZE];
@@ -239,6 +237,15 @@ char latC[1];
 char lon[10];
 char lonC[1];
 char buffGPS[40];
+char* a;
+char ReadyID[6];
+
+int ID;
+char IDLora[1];
+
+int IDSlave;
+char IDSlaveLora[1];
+
 
 
 struct datosMicro {
@@ -309,13 +316,18 @@ int main(void) {
 	/* Slave */
 //	bool isMaster = false;
 
+	ID = 0;
+	sprintf(IDLora,"%d", ID);
+	IDSlave = ID+1;
+	sprintf(IDSlaveLora,"%d", IDSlave);
+
 	while (1) {
 		if (recibidoReady == 0) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
 			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) ReadyMsg, (uint8_t *) RxReady, 5, 3000) == HAL_OK) {
 				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
 				}
-				PRINTF("%s\r\n", RxReady);
+//				PRINTF("%s\r\n", RxReady);
 				if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5) == 0) {
 //					Flush_Buffer(RxReady, 5);
 					recibidoReady = 1;
@@ -329,11 +341,7 @@ int main(void) {
 				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
 				}
 //				PRINTF("%s\r\n", parsingBuff);
-//				strcpy(misDat[i].datos, parsingBuff);
-
-				strncpy(BuffDatos, parsingBuff + 1, 39);
-				PRINTF("%s\r\n", BuffDatos);
-				strcpy(misDat[i].datos, BuffDatos);
+				strcpy(misDat[i].datos, parsingBuff);
 
 				if (strncmp((const char*) parsingBuff, (const char*) "GPS", 3)	== 0) {
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
@@ -346,12 +354,14 @@ int main(void) {
 			}
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 		}
+
+
 		switch (State) {
 		case RX:
 			if (isMaster == true) {
 				if (BufferSize > 0) {
-//					PRINTF(" Master: %s\r\n", Buffer);
-					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) {
+					PRINTF(" Master: %s\r\n", Buffer);
+					if ((strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) && Buffer[5] == IDSlaveLora[0]) {
 						enviadoReady = 1;
 						TimerStop(&timerLed);
 						LED_Off(LED_BLUE);
@@ -366,9 +376,7 @@ int main(void) {
 						recibidoMaster = 1;
 						errorReady = 1;
 					}
-					if ((recibidoMaster == 1)
-							&& (strncmp((const char*) Buffer,
-									(const char*) OKMsg, 2) == 0)) {
+					if ((recibidoMaster == 1) && (strncmp((const char*) Buffer,(const char*) OKMsg, 2) == 0) && Buffer[2] == IDSlaveLora[0]) {
 						DelayMs(1);
 						Radio.Send(misDat[i].datos, BUFFERSIZE);
 						Radio.Rx( RX_TIMEOUT_VALUE);
@@ -377,58 +385,50 @@ int main(void) {
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
 				}
-			} else {
-				if (BufferSize > 0) {
-					PRINTF("%s\r\n", Buffer);
-//					LCD_Cursor(1);
-//					LCD_Print_String("abcdefghijklmnopqrstuvwyz");
-//					LCD_Print_String("0123456789");
-//					strcpy(buffGPS, Buffer);
-//					LCD_Print(buffGPS);
-					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 5)
-							== 0) {
-						// Indicates on a LED that the received frame is a PING
-						LCD_Command(LCD_CLEAR_DISPLAY);
-						TimerStop(&timerLed);
-						LED_Off(LED_RED1);
-						LED_Off(LED_RED2);
-						LED_Off(LED_GREEN);
-						LED_Toggle(LED_BLUE);
-						Radio.Send(ReadyMsg, 5);
-						PRINTF("Slave Ready\r\n");
-						recibidoSlave = 1;
-						Radio.Rx( RX_TIMEOUT_VALUE);
-						LCD_Cursor(1);
-						strcpy(buffGPS, Buffer);
-						LCD_Print_String(buffGPS);
-					}
-					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "\nGPS", 4) == 0)) {
-						LCD_Command(LCD_CLEAR_DISPLAY);
-						Radio.Send(OKMsg, 2);
-						memcpy(hora, &Buffer[5], 8 );
-						memcpy(lat, &Buffer[14], 10 );
-						memcpy(latC, &Buffer[25], 1 );
-						memcpy(lon, &Buffer[27], 10 );
-						memcpy(lonC, &Buffer[38], 1 );
-						LCD_Cursor(1);
-						LCD_Print_String(hora);
-						LCD_Cursor(2);
-						LCD_Print_String(lat);
-						LCD_Print_String(latC);
-						LCD_Cursor(3);
-						LCD_Print_String(lon);
-						LCD_Print_String(lonC);
-						//						PRINTF("OK\r\n");
-						Radio.Rx( RX_TIMEOUT_VALUE);
-						//						strcpy(buffGPS, Buffer);
-						//						memcpy(hora, &Buffer[5], 8 );
-						//						LCD_Print(buffGPS);
-
-					}
-					Radio.Rx( RX_TIMEOUT_VALUE);
-					memset(Buffer, '\0', BUFFER_SIZE);
-				}
 			}
+//			else {
+//				if (BufferSize > 0) {
+//					PRINTF("%s\r\n", Buffer);
+//					if (strncmp((const char*) Buffer, (const char*) ReadyMsg, 6)
+//							== 0) {
+//						// Indicates on a LED that the received frame is a PING
+//						LCD_Command(LCD_CLEAR_DISPLAY);
+//						TimerStop(&timerLed);
+//						LED_Off(LED_RED1);
+//						LED_Off(LED_RED2);
+//						LED_Off(LED_GREEN);
+//						LED_Toggle(LED_BLUE);
+//						Radio.Send(ReadyMsg, 5);
+//						PRINTF("Slave Ready\r\n");
+//						recibidoSlave = 1;
+//						Radio.Rx( RX_TIMEOUT_VALUE);
+//						LCD_Cursor(1);
+//						strcpy(buffGPS, Buffer);
+//						LCD_Print_String(buffGPS);
+//					}
+//					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "\nGPS", 4) == 0)) {
+//						LCD_Command(LCD_CLEAR_DISPLAY);
+//						Radio.Send(OKMsg, 2);
+//						memcpy(hora, &Buffer[5], 8 );
+//						memcpy(lat, &Buffer[14], 10 );
+//						memcpy(latC, &Buffer[25], 1 );
+//						memcpy(lon, &Buffer[27], 10 );
+//						memcpy(lonC, &Buffer[38], 1 );
+//						LCD_Cursor(1);
+//						LCD_Print_String(hora);
+//						LCD_Cursor(2);
+//						LCD_Print_String(lat);
+//						LCD_Print_String(latC);
+//						LCD_Cursor(3);
+//						LCD_Print_String(lon);
+//						LCD_Print_String(lonC);
+//						Radio.Rx( RX_TIMEOUT_VALUE);
+//
+//					}
+//					Radio.Rx( RX_TIMEOUT_VALUE);
+//					memset(Buffer, '\0', BUFFER_SIZE);
+//				}
+//			}
 			State = LOWPOWER;
 			break;
 		case TX:
@@ -439,7 +439,8 @@ int main(void) {
 		case RX_ERROR:
 			if (isMaster == true) {
 				if (enviadoReady == 0) {
-					Radio.Send(ReadyMsg, 5);
+					sprintf(ReadyID, "%s%d", ReadyMsg, ID);
+					Radio.Send(ReadyID, 6);
 					PRINTF("Master Ready\r\n");
 				}
 				if (errorReady == 1) {
@@ -478,12 +479,13 @@ int main(void) {
 	}
 }
 
+//La llamada  PRINTF("txDone\n\r"); esta en sx1276.c, funcion SX1276OnDio0Irq
 void OnTxDone(void) {
 	Radio.Sleep();
 	State = TX;
-	PRINTF("OnTxDone\n");
 }
 
+//La llamada PRINTF("rxDone\n\r"); esta en sx1276.c, funcion SX1276OnDio0Irq
 void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
 	Radio.Sleep();
 	BufferSize = size;
@@ -491,9 +493,6 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
 	RssiValue = rssi;
 	SnrValue = snr;
 	State = RX;
-
-//	PRINTF("OnRxDone\n");
-//	PRINTF("RssiValue=%d dBm, SnrValue=%d\n", rssi, snr);
 }
 
 void OnTxTimeout(void) {
