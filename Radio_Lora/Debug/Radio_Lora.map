@@ -4831,7 +4831,7 @@ OUTPUT(Radio_Lora.elf elf32-littlearm)
  .debug_ranges  0x00001078       0x50 src\tiny_printf.o
  .debug_ranges  0x000010c8       0x50 src\vcom.o
 
-.debug_line     0x00000000     0xabb3
+.debug_line     0x00000000     0xabb1
  .debug_line    0x00000000      0x3cb Drivers\BSP\B-L072Z-LRWAN1\b-l072z-lrwan1.o
  .debug_line    0x000003cb      0xac1 Drivers\BSP\MLM32L07X01\Phy\sx1276.o
  .debug_line    0x00000e8c      0x476 Drivers\BSP\MLM32L07X01\mlm32l07x01.o
@@ -4859,14 +4859,14 @@ OUTPUT(Radio_Lora.elf elf32-littlearm)
  .debug_line    0x00008293      0x366 src\hw_gpio.o
  .debug_line    0x000085f9      0x550 src\hw_rtc.o
  .debug_line    0x00008b49      0x38e src\hw_spi.o
- .debug_line    0x00008ed7      0x5d3 src\main.o
- .debug_line    0x000094aa       0x7f src\startup_stm32l072xx.o
- .debug_line    0x00009529      0x39d src\stm32l0xx_hal_msp.o
- .debug_line    0x000098c6      0x50c src\stm32l0xx_hw.o
- .debug_line    0x00009dd2      0x436 src\stm32l0xx_it.o
- .debug_line    0x0000a208      0x272 src\system_stm32l0xx.o
- .debug_line    0x0000a47a      0x2b9 src\tiny_printf.o
- .debug_line    0x0000a733      0x480 src\vcom.o
+ .debug_line    0x00008ed7      0x5d1 src\main.o
+ .debug_line    0x000094a8       0x7f src\startup_stm32l072xx.o
+ .debug_line    0x00009527      0x39d src\stm32l0xx_hal_msp.o
+ .debug_line    0x000098c4      0x50c src\stm32l0xx_hw.o
+ .debug_line    0x00009dd0      0x436 src\stm32l0xx_it.o
+ .debug_line    0x0000a206      0x272 src\system_stm32l0xx.o
+ .debug_line    0x0000a478      0x2b9 src\tiny_printf.o
+ .debug_line    0x0000a731      0x480 src\vcom.o
 
 .debug_str      0x00000000     0x6200
  .debug_str     0x00000000      0xa5f Drivers\BSP\B-L072Z-LRWAN1\b-l072z-lrwan1.o
