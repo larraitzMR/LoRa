@@ -49,11 +49,6 @@ static void LoraRxData(lora_AppData_t *AppData);
 static LoRaMainCallback_t LoRaMainCallbacks = { HW_GetBatteryLevel,
 		HW_GetUniqueId, HW_GetRandomSeed, LoraTxData, LoraRxData };
 
-/*!
- * Specifies the state of the application LED
- */
-static uint8_t AppLedStateOn = RESET;
-
 /* !
  *Initialises the Lora Parameters
  */
@@ -160,9 +155,9 @@ uint8_t aTxBuffer[] =" ";
 uint8_t buffLora[40];
 uint8_t RxReady[5];
 uint8_t parsingBuff[BUFFERSIZE];
+//uint8_t parsingBuff[];
+uint8_t BuffDatos[BUFFERSIZE];
 
-const uint8_t PingMsg[] = "PING";
-const uint8_t PongMsg[] = "PONG";
 uint8_t ReadyMsg[] = "READY";
 uint8_t OKMsg[2] = "OK";
 
@@ -272,11 +267,13 @@ int main(void) {
 			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) OKMsg, (uint8_t *) parsingBuff, 40, 3000) == HAL_OK) {
 				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
 				}
-				strcpy(misDat[i].datos, parsingBuff);
-				if (strncmp((const char*) parsingBuff, (const char*) "GPS", 3)	== 0) {
+				strncpy(BuffDatos, parsingBuff + 1, 39);
+				strcpy(misDat[i].datos, BuffDatos);
+//				strcpy(misDat[i].datos, parsingBuff);
+				if (strncmp((const char*) BuffDatos, (const char*) "GPS", 3)	== 0) {
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-					if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) parsingBuff,(uint8_t *) OKMsg, 40, 3000) == HAL_OK) {
+					if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) BuffDatos,(uint8_t *) OKMsg, 40, 3000) == HAL_OK) {
 						while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
 						}
 					}
@@ -284,7 +281,6 @@ int main(void) {
 			}
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 		}
-
 
 		switch (State) {
 		case RX:
