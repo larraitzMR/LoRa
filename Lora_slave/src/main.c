@@ -48,30 +48,17 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-
-/* call back when LoRa will transmit a frame*/
-static void LoraTxData(lora_AppData_t *AppData, FunctionalState* IsTxConfirmed);
-
-/* call back when LoRa has received a frame*/
-static void LoraRxData(lora_AppData_t *AppData);
-
 /* Private variables ---------------------------------------------------------*/
-/* load call backs*/
-static LoRaMainCallback_t LoRaMainCallbacks = { HW_GetBatteryLevel,
-		HW_GetUniqueId, HW_GetRandomSeed, LoraTxData, LoraRxData };
 
 /*!
  * Specifies the state of the application LED
  */
-static uint8_t AppLedStateOn = RESET;
 
 #ifdef USE_B_L072Z_LRWAN1
 /*!
  * Timer to handle the application Tx Led to toggle
  */
-static TimerEvent_t TxLedTimer;
-static void OnTimerLedEvent(void);
-#endif
+
 /* !
  *Initialises the Lora Parameters
  */
@@ -152,9 +139,6 @@ States_t State = LOWPOWER;
 int8_t RssiValue = 0;
 int8_t SnrValue = 0;
 
-/* Led Timers objects*/
-static TimerEvent_t timerLed;
-
 /* Private function prototypes -----------------------------------------------*/
 /*!
  * Radio events function pointer
@@ -185,14 +169,6 @@ void OnRxTimeout(void);
  * \brief Function executed on Radio Rx Error event
  */
 void OnRxError(void);
-
-/*!
- * \brief Function executed on when led timer elapses
- */
-static void OnledEvent(void);
-/**
- * Main application entry point.
- */
 
 /* SPI handler declaration */
 extern SPI_HandleTypeDef hspi2;
@@ -276,15 +252,9 @@ int main(void) {
 	SPI_Init();
 
 	/* Configure the Lora Stack*/
-	lora_Init(&LoRaMainCallbacks, &LoRaParamInit);
+//	lora_Init(&LoRaMainCallbacks, &LoRaParamInit);
 
 	PRINTF("VERSION: %X\n\r", VERSION);
-
-	/* Led Timers*/
-	TimerInit(&timerLed, OnledEvent);
-	TimerSetValue(&timerLed, LED_PERIOD_MS);
-
-	TimerStart(&timerLed);
 
 //	 Radio initialization
 	RadioEvents.TxDone = OnTxDone;
@@ -315,7 +285,7 @@ int main(void) {
 
 	/* Slave */
 	bool isMaster = false;
-	ID = 1;
+	ID = 2;
 	sprintf(IDLora,"%d", ID);
 	IDMaster = ID-1;
 	sprintf(IDMasterLora,"%d", IDMaster);
@@ -333,7 +303,6 @@ int main(void) {
 						Radio.Send(misDat[i].datos, BUFFERSIZE);
 						enviadoReady = 1;
 						recibidoMaster = 1;
-//						recibidoSlave = 0;
 						errorReady = 1;
 					}
 					if ((recibidoMaster == 1)&& (strncmp((const char*) Buffer,(const char*) OKMsg, 2) == 0)	&& Buffer[2] == IDSlaveLora[0]) {
@@ -351,14 +320,12 @@ int main(void) {
 						DelayMs(1);
 						LCD_Command(LCD_CLEAR_DISPLAY);
 						LCD_Cursor(1);
-						strcpy(buffGPS, Buffer);
-						LCD_Print_String(buffGPS);
+						LCD_Print_String(Buffer);
 						sprintf(ReadyID, "%s%d", ReadyMsg, ID);
 						Radio.Send(ReadyID, 6);
 						recibidoSlave = 1;
 					}
 					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "\nGPS", 4) == 0)) {
-//						PRINTF("Soy Esclavo\r\n");
 						memcpy(hora, &Buffer[5], 8);
 						memcpy(lat, &Buffer[14], 10);
 						memcpy(latC, &Buffer[25], 1);
@@ -375,7 +342,7 @@ int main(void) {
 						LCD_Print_String(lonC);
 						sprintf(OK_ID, "%s%d", OKMsg, ID);
 						Radio.Send(OK_ID, 3);
-						isMaster = true;
+//						isMaster = true;
 					}
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
@@ -461,155 +428,3 @@ void OnRxError(void) {
 	State = RX_ERROR;
 //	PRINTF("OnRxError\n");
 }
-
-static void OnledEvent(void) {
-	LED_Toggle(LED_BLUE);
-	LED_Toggle(LED_RED1);
-	LED_Toggle(LED_RED2);
-	LED_Toggle(LED_GREEN);
-
-	TimerStart(&timerLed);
-}
-
-static void LoraTxData(lora_AppData_t *AppData, FunctionalState* IsTxConfirmed) {
-	/* USER CODE BEGIN 3 */
-	uint16_t pressure = 0;
-	int16_t temperature = 0;
-	uint16_t humidity = 0;
-	uint8_t batteryLevel;
-//  sensor_t sensor_data;
-
-#ifdef USE_B_L072Z_LRWAN1
-	TimerInit(&TxLedTimer, OnTimerLedEvent);
-
-	TimerSetValue(&TxLedTimer, 200);
-
-	LED_On(LED_RED1);
-
-	TimerStart(&TxLedTimer);
-#endif
-#ifndef CAYENNE_LPP
-	int32_t latitude, longitude = 0;
-	uint16_t altitudeGps = 0;
-#endif
-//  BSP_sensor_Read( &sensor_data );
-
-#ifdef CAYENNE_LPP
-	uint8_t cchannel = 0;
-//  temperature = ( int16_t )( sensor_data.temperature * 10 );     /* in °C * 10 */
-//  pressure    = ( uint16_t )( sensor_data.pressure * 100 / 10 );  /* in hPa / 10 */
-//  humidity    = ( uint16_t )( sensor_data.humidity * 2 );        /* in %*2     */
-	uint32_t i = 0;
-
-	batteryLevel = HW_GetBatteryLevel(); /* 1 (very low) to 254 (fully charged) */
-
-	AppData->Port = LPP_APP_PORT;
-
-	*IsTxConfirmed = LORAWAN_CONFIRMED_MSG;
-	AppData->Buff[i++] = cchannel++;
-	AppData->Buff[i++] = LPP_DATATYPE_BAROMETER;
-	AppData->Buff[i++] = (pressure >> 8) & 0xFF;
-	AppData->Buff[i++] = pressure & 0xFF;
-	AppData->Buff[i++] = cchannel++;
-	AppData->Buff[i++] = LPP_DATATYPE_TEMPERATURE;
-	AppData->Buff[i++] = (temperature >> 8) & 0xFF;
-	AppData->Buff[i++] = temperature & 0xFF;
-	AppData->Buff[i++] = cchannel++;
-	AppData->Buff[i++] = LPP_DATATYPE_HUMIDITY;
-	AppData->Buff[i++] = humidity & 0xFF;
-	AppData->Buff[i++] = cchannel++;
-	AppData->Buff[i++] = LPP_DATATYPE_DIGITAL_INPUT;
-	AppData->Buff[i++] = batteryLevel * 100 / 254;
-	AppData->Buff[i++] = cchannel++;
-	AppData->Buff[i++] = LPP_DATATYPE_DIGITAL_OUTPUT;
-	AppData->Buff[i++] = AppLedStateOn;
-#else
-	temperature = ( int16_t )( sensor_data.temperature * 100 ); /* in °C * 100 */
-	pressure = ( uint16_t )( sensor_data.pressure * 100 / 10 ); /* in hPa / 10 */
-	humidity = ( uint16_t )( sensor_data.humidity * 10 ); /* in %*10     */
-	latitude = sensor_data.latitude;
-	longitude= sensor_data.longitude;
-	uint32_t i = 0;
-
-	batteryLevel = HW_GetBatteryLevel( ); /* 1 (very low) to 254 (fully charged) */
-
-	AppData->Port = LORAWAN_APP_PORT;
-
-	*IsTxConfirmed = LORAWAN_CONFIRMED_MSG;
-
-#if defined( REGION_US915 ) || defined( REGION_US915_HYBRID )
-	AppData->Buff[i++] = AppLedStateOn;
-	AppData->Buff[i++] = ( pressure >> 8 ) & 0xFF;
-	AppData->Buff[i++] = pressure & 0xFF;
-	AppData->Buff[i++] = ( temperature >> 8 ) & 0xFF;
-	AppData->Buff[i++] = temperature & 0xFF;
-	AppData->Buff[i++] = ( humidity >> 8 ) & 0xFF;
-	AppData->Buff[i++] = humidity & 0xFF;
-	AppData->Buff[i++] = batteryLevel;
-	AppData->Buff[i++] = 0;
-	AppData->Buff[i++] = 0;
-	AppData->Buff[i++] = 0;
-#else
-	AppData->Buff[i++] = AppLedStateOn;
-	AppData->Buff[i++] = ( pressure >> 8 ) & 0xFF;
-	AppData->Buff[i++] = pressure & 0xFF;
-	AppData->Buff[i++] = ( temperature >> 8 ) & 0xFF;
-	AppData->Buff[i++] = temperature & 0xFF;
-	AppData->Buff[i++] = ( humidity >> 8 ) & 0xFF;
-	AppData->Buff[i++] = humidity & 0xFF;
-	AppData->Buff[i++] = batteryLevel;
-	AppData->Buff[i++] = ( latitude >> 16 ) & 0xFF;
-	AppData->Buff[i++] = ( latitude >> 8 ) & 0xFF;
-	AppData->Buff[i++] = latitude & 0xFF;
-	AppData->Buff[i++] = ( longitude >> 16 ) & 0xFF;
-	AppData->Buff[i++] = ( longitude >> 8 ) & 0xFF;
-	AppData->Buff[i++] = longitude & 0xFF;
-	AppData->Buff[i++] = ( altitudeGps >> 8 ) & 0xFF;
-	AppData->Buff[i++] = altitudeGps & 0xFF;
-#endif
-#endif
-	AppData->BuffSize = i;
-
-	/* USER CODE END 3 */
-}
-
-static void LoraRxData(lora_AppData_t *AppData) {
-	/* USER CODE BEGIN 4 */
-	switch (AppData->Port) {
-	case LORAWAN_APP_PORT:
-		if (AppData->BuffSize == 1) {
-			AppLedStateOn = AppData->Buff[0] & 0x01;
-			if (AppLedStateOn == RESET) {
-				PRINTF("LED OFF\n\r");
-				LED_Off(LED_BLUE);
-
-			} else {
-				PRINTF("LED ON\n\r");
-				LED_On(LED_BLUE);
-			}
-			//GpioWrite( &Led3, ( ( AppLedStateOn & 0x01 ) != 0 ) ? 0 : 1 );
-		}
-		break;
-	case LPP_APP_PORT: {
-		AppLedStateOn = (AppData->Buff[2] == 100) ? 0x01 : 0x00;
-		if (AppLedStateOn == RESET) {
-			PRINTF("LED OFF\n\r");
-			LED_Off(LED_BLUE);
-
-		} else {
-			PRINTF("LED ON\n\r");
-			LED_On(LED_BLUE);
-		}
-		break;
-	}
-	default:
-		break;
-	}
-	/* USER CODE END 4 */
-}
-
-#ifdef USE_B_L072Z_LRWAN1
-static void OnTimerLedEvent(void) {
-	LED_Off(LED_RED1);
-}
-#endif
