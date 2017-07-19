@@ -1,10 +1,6 @@
-main.c:258:5:main	64	static
-main.c:440:6:OnTxDone	8	static
-main.c:446:6:OnRxDone	32	static
-main.c:455:6:OnTxTimeout	8	static
-main.c:462:6:OnRxTimeout	8	static
-main.c:468:6:OnRxError	8	static
-main.c:474:13:OnledEvent	8	static
-main.c:483:13:LoraTxData	40	static
-main.c:585:13:LoraRxData	16	static
-main.c:621:13:OnTimerLedEvent	8	static
+main.c:203:5:main	64	static
+main.c:362:6:OnTxDone	8	static
+main.c:368:6:OnRxDone	32	static
+main.c:377:6:OnTxTimeout	8	static
+main.c:384:6:OnRxTimeout	8	static
+main.c:390:6:OnRxError	8	static
