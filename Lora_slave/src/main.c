@@ -240,11 +240,11 @@ int main(void) {
 						recibidoSlave = 1;
 					}
 					if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "GPS", 3) == 0)) {
-						memcpy(hora, &Buffer[5], 8);
-						memcpy(lat, &Buffer[14], 10);
-						memcpy(latC, &Buffer[25], 1);
-						memcpy(lon, &Buffer[27], 10);
-						memcpy(lonC, &Buffer[38], 1);
+						memcpy(hora, &Buffer[4], 8);
+						memcpy(lat, &Buffer[13], 10);
+						memcpy(latC, &Buffer[24], 1);
+						memcpy(lon, &Buffer[26], 10);
+						memcpy(lonC, &Buffer[37], 1);
 						LCD_Command(LCD_CLEAR_DISPLAY);
 						LCD_Cursor(1);
 						LCD_Print_String(hora);
@@ -256,7 +256,7 @@ int main(void) {
 						LCD_Print_String(lonC);
 						sprintf(OK_ID, "%s%d", OKMsg, ID);
 						Radio.Send(OK_ID, 3);
-//						isMaster = true;
+						isMaster = true;
 					}
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
