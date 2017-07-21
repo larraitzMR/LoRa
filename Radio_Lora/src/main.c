@@ -144,7 +144,7 @@ void OnRxError(void);
 extern SPI_HandleTypeDef hspi2;
 
 /* Buffer used for transmission */
-#define BUFFERSIZE                       39
+#define BUFFERSIZE                       40
 //#define BUFFERSIZE                       (COUNTOF(aTxBuffer) - 1)
 /* Exported macro ------------------------------------------------------------*/
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
@@ -264,13 +264,13 @@ int main(void) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 		} else if (recibidoReady == 1) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) OKMsg, (uint8_t *) parsingBuff, 40, 3000) == HAL_OK) {
+			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) OKMsg, (uint8_t *) parsingBuff, 40, 500) == HAL_OK) {
 				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
 				}
-				strncpy(BuffDatos, parsingBuff + 1, 39);
-				strcpy(misDat[i].datos, BuffDatos);
-//				strcpy(misDat[i].datos, parsingBuff);
-				if (strncmp((const char*) BuffDatos, (const char*) "GPS", 3)	== 0) {
+//				strncpy(BuffDatos, parsingBuff + 1, 39);
+//				strcpy(misDat[i].datos, BuffDatos);
+				strcpy(misDat[i].datos, parsingBuff);
+				if (strncmp((const char*) BuffDatos, (const char*) "\nGPS", 4)	== 0) {
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
 					if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) BuffDatos,(uint8_t *) OKMsg, 40, 3000) == HAL_OK) {
