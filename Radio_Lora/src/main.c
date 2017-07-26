@@ -253,7 +253,7 @@ int main(void) {
 	while (1) {
 		if (recibidoReady == 0) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) ReadyMsg, (uint8_t *) RxReady, 5, 3000) == HAL_OK) {
+			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) ReadyMsg, (uint8_t *) RxReady, 5, 2000) == HAL_OK) {
 				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
 				}
 				if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5) == 0) {
@@ -264,16 +264,16 @@ int main(void) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 		} else if (recibidoReady == 1) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) OKMsg, (uint8_t *) parsingBuff, 40, 500) == HAL_OK) {
+			if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) OKMsg, (uint8_t *) parsingBuff, 40, 2000) == HAL_OK) {
 				while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
 				}
-//				strncpy(BuffDatos, parsingBuff + 1, 39);
-//				strcpy(misDat[i].datos, BuffDatos);
-				strcpy(misDat[i].datos, parsingBuff);
+				strncpy(BuffDatos, parsingBuff + 1, 38);
+				strcpy(misDat[i].datos, BuffDatos);
+//				strcpy(misDat[i].datos, parsingBuff);
 				if (strncmp((const char*) BuffDatos, (const char*) "\nGPS", 4)	== 0) {
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
-					if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) BuffDatos,(uint8_t *) OKMsg, 40, 3000) == HAL_OK) {
+					if (HAL_SPI_TransmitReceive(&hspi2, (uint8_t*) BuffDatos,(uint8_t *) OKMsg, 40, 2000) == HAL_OK) {
 						while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY) {
 						}
 					}
@@ -286,7 +286,7 @@ int main(void) {
 		case RX:
 			if (isMaster == true) {
 				if (BufferSize > 0) {
-					PRINTF(" Master: %s\r\n", Buffer);
+//					PRINTF(" Master: %s\r\n", Buffer);
 					if ((strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) && Buffer[5] == IDSlaveLora[0]) {
 						DelayMs(1);
 						PRINTF(" Master: %s\r\n", Buffer);
@@ -351,6 +351,7 @@ int main(void) {
 #endif
 		}
 		ENABLE_IRQ( );
+		DelayMs(500);
 	}
 }
 
