@@ -202,10 +202,16 @@ void SysTick_Handler(void)
 {
 }*/
 extern SPI_HandleTypeDef hspi2;
+extern UART_HandleTypeDef huart1;
 
 void SPI2_IRQHandler(void)
 {
   HAL_SPI_IRQHandler(&hspi2);
+}
+
+void USART1_IRQHandler( void )
+{
+	HAL_UART_IRQHandler(&huart1);
 }
 
 void USART2_IRQHandler( void )

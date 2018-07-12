@@ -13,6 +13,7 @@
 	#include "version.h"
 	#include "gps.h"
 	#include "display.h"
+	#include "uart.h"
 
 	#if defined( USE_BAND_868 )
 
@@ -108,6 +109,7 @@
 	uint8_t buffLora[40];
 	uint8_t RxReady[5];
 	uint8_t parsingBuff[BUFFERSIZE];
+	uint8_t bufferGPS[80];
 
 	uint8_t ReadyMsg[] = "READY";
 	uint8_t OKMsg[] = "OK";
@@ -161,12 +163,15 @@
 		DBG_Init();
 		HW_Init();
 
-		LCD_Config();
-		LCD_Init();
-		LCD_Command(LCD_CLEAR_DISPLAY);
+//		LCD_Config();
+//		LCD_Init();
+//		LCD_Command(LCD_CLEAR_DISPLAY);
 
 		SPI_Config();
 		SPI_Init();
+
+//		UART_Config();
+//		UART1_Init();
 
 		PRINTF("VERSION: %X\n\r", VERSION);
 
@@ -242,7 +247,7 @@
 							DelayMs(1);
 						}
 						else if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "GPS", 3) == 0)) {
-							PRINTF(" Esclavo: %s\r\n", Buffer);
+//							PRINTF(" Esclavo: %s\r\n", Buffer);
 							memcpy(hora, &Buffer[4], 8);
 							memcpy(lat, &Buffer[13], 10);
 							memcpy(latC, &Buffer[24], 1);
@@ -259,7 +264,7 @@
 							LCD_Print_String(lonC);
 							sprintf(OK_ID, "%s%d", OKMsg, ID);
 							Radio.Send(OK_ID, 3);
-							isMaster = true;
+//							isMaster = true;
 							DelayMs(1);
 						}
 						Radio.Rx( RX_TIMEOUT_VALUE);
