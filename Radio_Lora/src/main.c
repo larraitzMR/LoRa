@@ -220,7 +220,6 @@ uint8_t Buffer[BUFFER_SIZE];
 
 
 extern UART_HandleTypeDef huart1;
-//__IO ITStatus UartReady = RESET;
 
 int recibidoMaster = 0;
 int recibidoSlave = 0;
@@ -245,8 +244,6 @@ char IDLora[1];
 
 int IDSlave;
 char IDSlaveLora[1];
-
-
 
 struct datosMicro {
 	char datos[100];
@@ -313,8 +310,6 @@ int main(void) {
 
 	/* Master */
 	bool isMaster = true;
-	/* Slave */
-//	bool isMaster = false;
 
 	ID = 0;
 	sprintf(IDLora,"%d", ID);
@@ -329,7 +324,6 @@ int main(void) {
 				}
 				PRINTF("%s\r\n", RxReady);
 				if (strncmp((const char*) RxReady, (const char*) ReadyMsg, 5) == 0) {
-//					Flush_Buffer(RxReady, 5);
 					recibidoReady = 1;
 					PRINTF("Recibido Ready\r\n");
 				}
@@ -355,7 +349,6 @@ int main(void) {
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 		}
 
-
 		switch (State) {
 		case RX:
 			if (isMaster == true) {
@@ -363,13 +356,6 @@ int main(void) {
 					PRINTF(" Master: %s\r\n", Buffer);
 					if ((strncmp((const char*) Buffer, (const char*) ReadyMsg, 5) == 0) && Buffer[5] == IDSlaveLora[0]) {
 						enviadoReady = 1;
-						TimerStop(&timerLed);
-						LED_Off(LED_BLUE);
-						LED_Off(LED_GREEN);
-						LED_Off(LED_RED1);
-						// Indicates on a LED that the received frame is a PONG
-						LED_Toggle(LED_RED2);
-
 						DelayMs(1);
 						Radio.Send(misDat[i].datos, BUFFERSIZE);
 						Radio.Rx( RX_TIMEOUT_VALUE);
@@ -380,7 +366,6 @@ int main(void) {
 						DelayMs(1);
 						Radio.Send(misDat[i].datos, BUFFERSIZE);
 						Radio.Rx( RX_TIMEOUT_VALUE);
-//						PRINTF("Enviando LAR\r\n");
 					}
 					Radio.Rx( RX_TIMEOUT_VALUE);
 					memset(Buffer, '\0', BUFFER_SIZE);
@@ -455,20 +440,16 @@ void OnRxDone(uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr) {
 void OnTxTimeout(void) {
 	Radio.Sleep();
 	State = TX_TIMEOUT;
-
-//	PRINTF("OnTxTimeout\n");
 }
 
 void OnRxTimeout(void) {
 	Radio.Sleep();
 	State = RX_TIMEOUT;
-//	PRINTF("OnRxTimeout\n");
 }
 
 void OnRxError(void) {
 	Radio.Sleep();
 	State = RX_ERROR;
-//	PRINTF("OnRxError\n");
 }
 
 static void OnledEvent(void) {

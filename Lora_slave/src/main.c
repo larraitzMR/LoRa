@@ -115,7 +115,6 @@
 	uint8_t OKMsg[] = "OK";
 
 	extern UART_HandleTypeDef huart1;
-	//__IO ITStatus UartReady = RESET;
 
 	int recibidoMaster = 0;
 	int recibidoSlave = 0;
@@ -163,15 +162,8 @@
 		DBG_Init();
 		HW_Init();
 
-//		LCD_Config();
-//		LCD_Init();
-//		LCD_Command(LCD_CLEAR_DISPLAY);
-
 		SPI_Config();
 		SPI_Init();
-
-//		UART_Config();
-//		UART1_Init();
 
 		PRINTF("VERSION: %X\n\r", VERSION);
 
@@ -224,7 +216,7 @@
 							errorReady = 1;
 							DelayMs(1);
 						}
-						else if ((recibidoMaster == 1)&& (strncmp((const char*) Buffer,(const char*) OKMsg, 2) == 0)	&& Buffer[2] == IDSlaveLora[0]) {
+						else if ((recibidoMaster == 1)&& (strncmp((const char*) Buffer,(const char*) OKMsg, 2) == 0) && Buffer[2] == IDSlaveLora[0]) {
 							PRINTF(" Master: %s\r\n", Buffer);
 							Radio.Send(misDat[i].datos, BUFFERSIZE);
 							isMaster = false;
@@ -238,9 +230,6 @@
 						PRINTF("%s\r\n", Buffer);
 						if ((strncmp((const char*) Buffer, (const char*) ReadyMsg,5) == 0) && Buffer[5] == IDMasterLora[0]) {
 							PRINTF(" Esclavo: %s\r\n", Buffer);
-							LCD_Command(LCD_CLEAR_DISPLAY);
-							LCD_Cursor(1);
-							LCD_Print_String(Buffer);
 							sprintf(ReadyID, "%s%d", ReadyMsg, ID);
 							Radio.Send(ReadyID, 6);
 							recibidoSlave = 1;
@@ -248,23 +237,8 @@
 						}
 						else if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "GPS", 3) == 0)) {
 							PRINTF("%s\r\n", Buffer);
-//							memcpy(hora, &Buffer[4], 8);
-//							memcpy(lat, &Buffer[13], 10);
-//							memcpy(latC, &Buffer[24], 1);
-//							memcpy(lon, &Buffer[26], 10);
-//							memcpy(lonC, &Buffer[37], 1);
-//							LCD_Command(LCD_CLEAR_DISPLAY);
-//							LCD_Cursor(1);
-//							LCD_Print_String(hora);
-//							LCD_Cursor(2);
-//							LCD_Print_String(lat);
-//							LCD_Print_String(latC);
-//							LCD_Cursor(3);
-//							LCD_Print_String(lon);
-//							LCD_Print_String(lonC);
 							sprintf(OK_ID, "%s%d", OKMsg, ID);
 							Radio.Send(OK_ID, 3);
-//							isMaster = true;
 							DelayMs(1);
 						}
 						Radio.Rx( RX_TIMEOUT_VALUE);
@@ -349,5 +323,4 @@
 	void OnRxError(void) {
 		Radio.Sleep();
 		State = RX_ERROR;
-	//	PRINTF("OnRxError\n");
 	}
