@@ -247,21 +247,21 @@
 							DelayMs(1);
 						}
 						else if ((recibidoSlave == 1) && (strncmp((const char*) Buffer,(const char*) "GPS", 3) == 0)) {
-//							PRINTF(" Esclavo: %s\r\n", Buffer);
-							memcpy(hora, &Buffer[4], 8);
-							memcpy(lat, &Buffer[13], 10);
-							memcpy(latC, &Buffer[24], 1);
-							memcpy(lon, &Buffer[26], 10);
-							memcpy(lonC, &Buffer[37], 1);
-							LCD_Command(LCD_CLEAR_DISPLAY);
-							LCD_Cursor(1);
-							LCD_Print_String(hora);
-							LCD_Cursor(2);
-							LCD_Print_String(lat);
-							LCD_Print_String(latC);
-							LCD_Cursor(3);
-							LCD_Print_String(lon);
-							LCD_Print_String(lonC);
+							PRINTF("%s\r\n", Buffer);
+//							memcpy(hora, &Buffer[4], 8);
+//							memcpy(lat, &Buffer[13], 10);
+//							memcpy(latC, &Buffer[24], 1);
+//							memcpy(lon, &Buffer[26], 10);
+//							memcpy(lonC, &Buffer[37], 1);
+//							LCD_Command(LCD_CLEAR_DISPLAY);
+//							LCD_Cursor(1);
+//							LCD_Print_String(hora);
+//							LCD_Cursor(2);
+//							LCD_Print_String(lat);
+//							LCD_Print_String(latC);
+//							LCD_Cursor(3);
+//							LCD_Print_String(lon);
+//							LCD_Print_String(lonC);
 							sprintf(OK_ID, "%s%d", OKMsg, ID);
 							Radio.Send(OK_ID, 3);
 //							isMaster = true;
